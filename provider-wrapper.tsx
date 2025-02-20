@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 export default function ProvidersWrapper({
   children,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   const [mounted, setMounted] = useState<boolean>(false);
   useEffect(() => {
