@@ -175,6 +175,7 @@ const saveWebAuthNRegistrationResponse = async (
 };
 
 const generateWebAuthNAuthenticationOptions = async () => {
+  "use server";
   try {
     const options = await generateAuthenticationOptions({
       rpID: new URL(NEXTAUTH_URL).hostname,
@@ -190,6 +191,7 @@ const verifyWebAuthNAuthenticationResponse = async (
   attestation: AuthenticationResponseJSON,
   options: PublicKeyCredentialRequestOptionsJSON
 ) => {
+  "use server";
   try {
     const authenticator = await prisma.authenticator.findFirst({
       where: { credentialID: attestation.id },
@@ -223,6 +225,7 @@ const verifyWebAuthNAuthenticationResponse = async (
 const saveWebAuthNAutenticationResponse = async (
   verification: VerifiedAuthenticationResponse
 ) => {
+  "use server";
   try {
     if (!verification.verified) throw new Error("Passkey not verified");
 
@@ -248,6 +251,7 @@ const saveWebAuthNAutenticationResponse = async (
 };
 
 const passkeySignIn = async (data: { email: string; credentialId: string }) => {
+  "use server";
   const formData = new FormData();
   formData.append("email", data.email);
   formData.append("credentialId", data.credentialId);
