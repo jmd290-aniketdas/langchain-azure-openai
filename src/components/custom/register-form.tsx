@@ -16,6 +16,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Toggle } from "../ui/toggle";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 
 export default function RegisterForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -120,34 +121,36 @@ export default function RegisterForm({ className }: { className?: string }) {
         </p>
       </div>
 
-      <Toggle
-        variant="outline"
-        type="button"
-        pressed={isRegisterPasskeyEnabled}
-        onPressedChange={setRegisterPasskeyEnabled}
-        className="mb-3"
-      >
-        <span className="relative h-full w-4">
-          <Power
-            className={cn(
-              "absolute top-1/2 -translate-y-1/2 transition-all rotate-0 scale-100",
-              isRegisterPasskeyEnabled && "-rotate-90 scale-0"
-            )}
-          />
-          <PowerOff
-            className={cn(
-              "absolute top-1/2 -translate-y-1/2 transition-all -rotate-90 scale-0",
-              isRegisterPasskeyEnabled && "rotate-0 scale-100"
-            )}
-          />
-        </span>
-        {isRegisterPasskeyEnabled ? (
-          <p>Disable Passkey Registration</p>
-        ) : (
-          <p>Enable Passkey Registration</p>
-        )}
-        <Fingerprint />
-      </Toggle>
+      {browserSupportsWebAuthn() && (
+        <Toggle
+          variant="outline"
+          type="button"
+          pressed={isRegisterPasskeyEnabled}
+          onPressedChange={setRegisterPasskeyEnabled}
+          className="mb-3"
+        >
+          <span className="relative h-full w-4">
+            <Power
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 transition-all rotate-0 scale-100",
+                isRegisterPasskeyEnabled && "-rotate-90 scale-0"
+              )}
+            />
+            <PowerOff
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 transition-all -rotate-90 scale-0",
+                isRegisterPasskeyEnabled && "rotate-0 scale-100"
+              )}
+            />
+          </span>
+          {isRegisterPasskeyEnabled ? (
+            <p>Disable Passkey Registration</p>
+          ) : (
+            <p>Enable Passkey Registration</p>
+          )}
+          <Fingerprint />
+        </Toggle>
+      )}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="animate-spin" /> : "Register"}

@@ -75,7 +75,6 @@ const generateWebAuthNRegistrationOptions = async (email: string) => {
     userName: user.email,
     userDisplayName: user.name ? user.name : undefined,
     attestationType: "direct",
-    preferredAuthenticatorType: "localDevice",
     excludeCredentials: authenticators.map((auth) => ({
       id: auth.credentialID,
       transports: auth.transports ? JSON.parse(auth.transports) : [],
@@ -179,7 +178,7 @@ const generateWebAuthNAuthenticationOptions = async () => {
   try {
     const options = await generateAuthenticationOptions({
       rpID: new URL(NEXTAUTH_URL).hostname,
-      userVerification: "required",
+      userVerification: "preferred",
     });
     return options;
   } catch (error) {

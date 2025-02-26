@@ -6,14 +6,15 @@ import {
   saveWebAuthNAutenticationResponse,
   verifyWebAuthNAuthenticationResponse,
 } from "@/actions/auth.server";
-import { addDateTime, cn } from "@/lib/utils";
-import { startAuthentication } from "@simplewebauthn/browser";
+import { cn } from "@/lib/utils";
+import {
+  browserSupportsWebAuthn,
+  startAuthentication
+} from "@simplewebauthn/browser";
 import { Fingerprint } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import { signIn } from "@/auth";
 
 export default function PasskeyLoginForm({
   className,
@@ -21,7 +22,6 @@ export default function PasskeyLoginForm({
   className?: string;
 }) {
   const router = useRouter();
-  const { update } = useSession();
 
   const onClick = async () => {
     try {
@@ -51,15 +51,17 @@ export default function PasskeyLoginForm({
     }
   };
 
-  return (
-    <Button
-      type="submit"
-      variant="outline"
-      className={cn("w-full", className)}
-      onClick={onClick}
-    >
-      <Fingerprint />
-      Login with Passkey
-    </Button>
-  );
+  if (browserSupportsWebAuthn())
+    return (
+      <Button
+        type="submit"
+        variant="outline"
+        className={cn("w-full", className)}
+        onClick={onClick}
+      >
+        <Fingerprint />
+        Login with Passkey
+      </Button>
+    );
+  else return <></>;
 }

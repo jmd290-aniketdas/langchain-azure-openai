@@ -6,12 +6,16 @@ import {
   verifyWebAuthNRegistrationResponse,
 } from "@/actions/auth.server";
 import { cn } from "@/lib/utils";
-import { startRegistration } from "@simplewebauthn/browser";
+import {
+  browserSupportsWebAuthn,
+  startRegistration,
+} from "@simplewebauthn/browser";
 import { Fingerprint } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { useEffect } from "react";
 
 export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -42,6 +46,12 @@ export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
       }
     }
   };
+  useEffect(() => {
+    if (browserSupportsWebAuthn()) {
+      toast.warning("Browser doesnot support WebAuthN");
+      router.push("/query");
+    }
+  }, []);
 
   return (
     <Button
