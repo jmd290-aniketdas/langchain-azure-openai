@@ -2,7 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProvidersWrapper({
   children,

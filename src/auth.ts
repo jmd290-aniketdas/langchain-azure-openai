@@ -1,18 +1,19 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { prisma } from "./lib/prisma";
-import { signInSchema } from "./lib/validators/signin-schema";
+import { signInSchemaAuthParser } from "./lib/validators/signin-schema";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
-    Github,
-    Google,
-    MicrosoftEntraID,
+    Github({ allowDangerousEmailAccountLinking: true }),
+    Google({ allowDangerousEmailAccountLinking: true }),
+    MicrosoftEntraID({ allowDangerousEmailAccountLinking: true }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -20,20 +21,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const { email, password } = signInSchema.parse(credentials);
+          const { email, password, credentialId } =
+            signInSchemaAuthParser.parse(credentials);
 
           const user = await prisma.user.findUnique({ where: { email } });
           if (!user) {
             throw new Error("User not found");
           }
 
-          if (!user.passwordHash) {
-            throw new Error("Password not set");
-          }
+          if (password) {
+            if (!user.passwordHash) {
+              throw new Error("Password not set");
+            }
 
-          const isValid = Bun.password.verifySync(password, user.passwordHash);
-          if (!isValid) {
-            throw new Error("Invalid password");
+            const isValid = bcrypt.compareSync(password, user.passwordHash);
+            if (!isValid) throw new Error("Invalid password");
+          } else {
+            const authenticator = await prisma.authenticator.findUnique({
+              where: {
+                credentialID: credentialId,
+              },
+            });
+            if (!authenticator) throw new Error("No Authenticator associated");
+
+            if (authenticator.userId !== user.id)
+              throw new Error("Invalid Authenticator");
           }
 
           return user;
@@ -43,6 +55,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "database" },
+  session: { strategy: "jwt" },
   pages: { signIn: "/login", newUser: "/register", signOut: "/logout" },
 });

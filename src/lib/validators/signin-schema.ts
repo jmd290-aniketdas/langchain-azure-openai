@@ -12,4 +12,19 @@ export const signInSchema = z.object({
     .max(32, "Password must be less than 32 characters"),
 });
 
+export const signInSchemaAuthParser = z
+  .object({
+    email: z
+      .string({ required_error: "Email is required" })
+      .nonempty("Email is required")
+      .email("Please provide a valid email address"),
+    password: z.string().optional(),
+    credentialId: z.string().optional(),
+  })
+  .refine((data) => data.password || data.credentialId, {
+    message: "Either password or credentialId is required",
+    path: ["password"],
+  });
+
 export type SignInSchema = z.infer<typeof signInSchema>;
+export type SignInSchemaAuthParser = z.infer<typeof signInSchemaAuthParser>;
