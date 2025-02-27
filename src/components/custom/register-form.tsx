@@ -9,7 +9,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Fingerprint, Loader2, Power, PowerOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -22,6 +22,10 @@ export default function RegisterForm({ className }: { className?: string }) {
   const router = useRouter();
   const [isRegisterPasskeyEnabled, setRegisterPasskeyEnabled] =
     useState<boolean>(false);
+  const [isWebAuthNSupported, setWebAuthNSupported] = useState<boolean>(false);
+  useEffect(() => {
+    setWebAuthNSupported(browserSupportsWebAuthn());
+  }, []);
 
   const {
     register,
@@ -121,36 +125,35 @@ export default function RegisterForm({ className }: { className?: string }) {
         </p>
       </div>
 
-      {browserSupportsWebAuthn() && (
-        <Toggle
-          variant="outline"
-          type="button"
-          pressed={isRegisterPasskeyEnabled}
-          onPressedChange={setRegisterPasskeyEnabled}
-          className="mb-3"
-        >
-          <span className="relative h-full w-4">
-            <Power
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 transition-all rotate-0 scale-100",
-                isRegisterPasskeyEnabled && "-rotate-90 scale-0"
-              )}
-            />
-            <PowerOff
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 transition-all -rotate-90 scale-0",
-                isRegisterPasskeyEnabled && "rotate-0 scale-100"
-              )}
-            />
-          </span>
-          {isRegisterPasskeyEnabled ? (
-            <p>Disable Passkey Registration</p>
-          ) : (
-            <p>Enable Passkey Registration</p>
-          )}
-          <Fingerprint />
-        </Toggle>
-      )}
+      <Toggle
+        variant="outline"
+        type="button"
+        pressed={isRegisterPasskeyEnabled}
+        onPressedChange={setRegisterPasskeyEnabled}
+        className={cn("mb-3", !isWebAuthNSupported && "hidden")}
+        disabled={!isWebAuthNSupported}
+      >
+        <span className="relative h-full w-4">
+          <Power
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 transition-all rotate-0 scale-100",
+              isRegisterPasskeyEnabled && "-rotate-90 scale-0"
+            )}
+          />
+          <PowerOff
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 transition-all -rotate-90 scale-0",
+              isRegisterPasskeyEnabled && "rotate-0 scale-100"
+            )}
+          />
+        </span>
+        {isRegisterPasskeyEnabled ? (
+          <p>Disable Passkey Registration</p>
+        ) : (
+          <p>Enable Passkey Registration</p>
+        )}
+        <Fingerprint />
+      </Toggle>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="animate-spin" /> : "Register"}

@@ -9,12 +9,13 @@ import {
 import { cn } from "@/lib/utils";
 import {
   browserSupportsWebAuthn,
-  startAuthentication
+  startAuthentication,
 } from "@simplewebauthn/browser";
 import { Fingerprint } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { useState, useEffect } from "react";
 
 export default function PasskeyLoginForm({
   className,
@@ -22,6 +23,10 @@ export default function PasskeyLoginForm({
   className?: string;
 }) {
   const router = useRouter();
+  const [isWebAuthNSupported, setWebAuthNSupported] = useState<boolean>(false);
+  useEffect(() => {
+    setWebAuthNSupported(browserSupportsWebAuthn());
+  }, []);
 
   const onClick = async () => {
     try {
@@ -51,17 +56,20 @@ export default function PasskeyLoginForm({
     }
   };
 
-  if (browserSupportsWebAuthn())
-    return (
-      <Button
-        type="submit"
-        variant="outline"
-        className={cn("w-full", className)}
-        onClick={onClick}
-      >
-        <Fingerprint />
-        Login with Passkey
-      </Button>
-    );
-  else return <></>;
+  return (
+    <Button
+      type="submit"
+      variant="outline"
+      className={cn(
+        "w-full",
+        className,
+        !isWebAuthNSupported && "hidden"
+      )}
+      disabled={!isWebAuthNSupported}
+      onClick={onClick}
+    >
+      <Fingerprint />
+      Login with Passkey
+    </Button>
+  );
 }
