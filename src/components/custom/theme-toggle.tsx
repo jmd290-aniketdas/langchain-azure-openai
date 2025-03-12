@@ -1,10 +1,9 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { Button, ButtonProps } from "../ui/button";
-import { useCallback } from "react";
-import { cn } from "@/lib/utils";
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useCallback } from "react";
+import { Button, ButtonProps } from "../ui/button";
 
 export const ThemeToggle = ({
   className,
@@ -19,7 +18,7 @@ export const ThemeToggle = ({
     <Button
       variant={variant}
       size="icon"
-      className={cn("size-7", className)}
+      className={className}
       onClick={toggleTheme}
       {...props}
     >

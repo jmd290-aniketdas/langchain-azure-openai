@@ -16,7 +16,7 @@ const GradientIcon = ({
   );
   return (
     <div
-      className={cn("w-full h-full", className)}
+      className={cn("w-full h-full bg-gradient-to-b from-muted to-muted-foreground", className)}
       style={{
         maskImage: `url('data:image/svg+xml;charset=UTF-8,${logoSVG}')`,
         WebkitMaskImage: `url('data:image/svg+xml;charset=UTF-8,${logoSVG}')`,
