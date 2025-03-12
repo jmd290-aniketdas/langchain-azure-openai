@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function Query() {
   const session = await auth();
+  console.log(session);
   if (!session) redirect("/login");
 
   return (

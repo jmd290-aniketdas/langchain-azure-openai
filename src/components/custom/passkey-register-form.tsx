@@ -47,7 +47,7 @@ export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
     }
   };
   useEffect(() => {
-    if (browserSupportsWebAuthn()) {
+    if (!browserSupportsWebAuthn()) {
       toast.warning("Browser doesnot support WebAuthN");
       router.push("/query");
     }

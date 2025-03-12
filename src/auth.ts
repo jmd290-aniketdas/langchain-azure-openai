@@ -20,38 +20,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        try {
-          const { email, password, credentialId } =
-            signInSchemaAuthParser.parse(credentials);
+        const { email, password, credentialId } =
+          signInSchemaAuthParser.parse(credentials);
 
-          const user = await prisma.user.findUnique({ where: { email } });
-          if (!user) {
-            throw new Error("User not found");
-          }
-
-          if (password) {
-            if (!user.passwordHash) {
-              throw new Error("Password not set");
-            }
-
-            const isValid = bcrypt.compareSync(password, user.passwordHash);
-            if (!isValid) throw new Error("Invalid password");
-          } else {
-            const authenticator = await prisma.authenticator.findUnique({
-              where: {
-                credentialID: credentialId,
-              },
-            });
-            if (!authenticator) throw new Error("No Authenticator associated");
-
-            if (authenticator.userId !== user.id)
-              throw new Error("Invalid Authenticator");
-          }
-
-          return user;
-        } catch (error) {
-          throw error;
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          throw new Error("User not found");
         }
+
+        if (password) {
+          if (!user.passwordHash) {
+            throw new Error("Password not set");
+          }
+
+          const isValid = bcrypt.compareSync(password, user.passwordHash);
+          if (!isValid) throw new Error("Invalid password");
+        } else {
+          const authenticator = await prisma.authenticator.findUnique({
+            where: {
+              credentialID: credentialId,
+            },
+          });
+          if (!authenticator) throw new Error("No Authenticator associated");
+
+          if (authenticator.userId !== user.id)
+            throw new Error("Invalid Authenticator");
+        }
+
+        return user;
       },
     }),
   ],
