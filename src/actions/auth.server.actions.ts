@@ -1,7 +1,11 @@
 "use server";
 
-import { signIn } from "@/auth";
-import { APP_NAME, NEXTAUTH_URL } from "@/lib/environment-variables";
+import { signIn, signOut } from "@/auth";
+import {
+  APP_NAME,
+  DEFAULT_LOGIN_ROUTE,
+  NEXTAUTH_URL,
+} from "@/lib/environment-variables";
 import { prisma } from "@/lib/prisma";
 import { RegisterSchema } from "@/lib/validators/register-schema";
 import { SignInSchema } from "@/lib/validators/signin-schema";
@@ -258,6 +262,11 @@ const passkeySignIn = async (data: { email: string; credentialId: string }) => {
   await signIn("credentials", formData);
 };
 
+const userSignOut = async () => {
+  "use server";
+  await signOut({ redirectTo: DEFAULT_LOGIN_ROUTE });
+};
+
 export {
   credentialsRegister,
   credentialsSignIn,
@@ -268,4 +277,5 @@ export {
   saveWebAuthNRegistrationResponse,
   verifyWebAuthNAuthenticationResponse,
   verifyWebAuthNRegistrationResponse,
+  userSignOut,
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { credentialsRegister, credentialsSignIn } from "@/actions/auth.server";
+import { credentialsRegister, credentialsSignIn } from "@/actions/auth.server.actions";
 import { cn } from "@/lib/utils";
 import {
   registerSchema,
@@ -12,11 +12,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Toggle } from "../ui/toggle";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Toggle } from "../../../../components/ui/toggle";
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_PASSKEY_REGISTER_ROUTE } from "@/lib/environment-variables";
 
 export default function RegisterForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -44,9 +45,9 @@ export default function RegisterForm({ className }: { className?: string }) {
       toast.success("Successfully Signed In with Credentials");
 
       if (isRegisterPasskeyEnabled) {
-        router.push("/register/passkey");
+        router.push(DEFAULT_PASSKEY_REGISTER_ROUTE);
       } else {
-        router.push("/query");
+        router.push(DEFAULT_LOGGED_IN_ROUTE);
       }
     } catch (error) {
       const e = error as Error;

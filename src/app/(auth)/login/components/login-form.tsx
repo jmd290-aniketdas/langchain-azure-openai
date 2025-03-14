@@ -1,6 +1,6 @@
 "use client";
 
-import { credentialsSignIn } from "@/actions/auth.server";
+import { credentialsSignIn } from "@/actions/auth.server.actions";
 import { cn } from "@/lib/utils";
 import { signInSchema, SignInSchema } from "@/lib/validators/signin-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,9 +8,10 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
 
 export default function LoginForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function LoginForm({ className }: { className?: string }) {
     }
     toast.success("Successfully Signed In with Credentials");
 
-    router.push("/query");
+    router.push(DEFAULT_LOGGED_IN_ROUTE);
   };
 
   return (

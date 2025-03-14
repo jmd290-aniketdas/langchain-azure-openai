@@ -45,3 +45,12 @@ export function addDateTime(
 
   return newDate;
 }
+
+export function getAbbreviatedName(str?: string) {
+  if (!str) return;
+
+  return str
+    .split(" ")
+    .map((w) => w[0])
+    .join("");
+}

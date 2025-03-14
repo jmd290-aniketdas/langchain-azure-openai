@@ -5,7 +5,7 @@ import {
   passkeySignIn,
   saveWebAuthNAutenticationResponse,
   verifyWebAuthNAuthenticationResponse,
-} from "@/actions/auth.server";
+} from "@/actions/auth.server.actions";
 import { cn } from "@/lib/utils";
 import {
   browserSupportsWebAuthn,
@@ -14,8 +14,9 @@ import {
 import { Fingerprint } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { Button } from "../../../../components/ui/button";
 import { useState, useEffect } from "react";
+import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
 
 export default function PasskeyLoginForm({
   className,
@@ -46,7 +47,7 @@ export default function PasskeyLoginForm({
       });
 
       toast.success("Successfully Signed in with Passkey");
-      router.push("/query");
+      router.push(DEFAULT_LOGGED_IN_ROUTE);
     } catch (error) {
       const e = error as Error;
       if (e.message !== "NEXT_REDIRECT") {

@@ -1,3 +1,10 @@
 {
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "tailwindCSS.experimental.configFile": ".\\src\\app\\globals.css",
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
+  "files.associations": { "*.css": "tailwindcss" }
 }

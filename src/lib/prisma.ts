@@ -9,15 +9,13 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const connectionString = `${DATABASE_URL}`;
-
 neonConfig.fetchEndpoint = (host) => {
   const [protocol, port] = host === 'db.localtest.me' ? ['http', 4444] : ['https', 443];
   return `${protocol}://${host}:${port}/sql`;
 };
 
 // For WebSocket connections, disable TLS for our local testing.
-const connectionUrl = new URL(connectionString);
+const connectionUrl = new URL(DATABASE_URL);
 neonConfig.useSecureWebSocket = connectionUrl.hostname !== 'db.localtest.me';
 
 // Set up the WebSocket proxy to point to port 4444.
@@ -33,7 +31,7 @@ neonConfig.webSocketConstructor = ws;
 neonConfig.poolQueryViaFetch = true;
 
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({ connectionString: DATABASE_URL });
 const adapter = new PrismaNeon(pool);
 const prisma = global.prisma || new PrismaClient({ adapter });
 

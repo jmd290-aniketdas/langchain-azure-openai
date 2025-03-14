@@ -7,10 +7,10 @@ if (!process.env.APP_NAME) {
   );
 }
 
-const NEXTAUTH_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const NEXTAUTH_URL = process.env.NEXTAUTH_URL || window.location.origin;
 if (!process.env.NEXTAUTH_URL) {
   console.warn(
-    "Environment Variables doesnot contain: NEXTAUTH_URL\n\tUsing default: http://localhost:3000"
+    `Environment Variables doesnot contain: NEXTAUTH_URL\n\tUsing default: ${window.location.origin}`
   );
 }
 
@@ -98,6 +98,40 @@ if (!process.env.AUTH_AZURE_AD_SECRET) {
   // _absent_envs.push("AUTH_AZURE_AD_SECRET");
 }
 
+const DEFAULT_LOGIN_ROUTE = process.env.DEFAULT_LOGIN_ROUTE || "/login";
+if (!process.env.DEFAULT_LOGIN_ROUTE) {
+  console.warn(
+    "Environment Variables doesnot contain: DEFAULT_LOGIN_ROUTE\n\tUsing default: /login"
+  );
+  // _absent_envs.push("DEFAULT_LOGIN_ROUTE");
+}
+
+const DEFAULT_REGISTER_ROUTE =
+  process.env.DEFAULT_REGISTER_ROUTE || "/register";
+if (!process.env.DEFAULT_REGISTER_ROUTE) {
+  console.warn(
+    "Environment Variables doesnot contain: DEFAULT_REGISTER_ROUTE\n\tUsing default: /register"
+  );
+  // _absent_envs.push("DEFAULT_REGISTER_ROUTE");
+}
+
+const DEFAULT_PASSKEY_REGISTER_ROUTE =
+  process.env.DEFAULT_PASSKEY_REGISTER_ROUTE || "/register/passkey";
+if (!process.env.DEFAULT_PASSKEY_REGISTER_ROUTE) {
+  console.warn(
+    "Environment Variables doesnot contain: DEFAULT_PASSKEY_REGISTER_ROUTE\n\tUsing default: /register/passkey"
+  );
+  // _absent_envs.push("DEFAULT_PASSKEY_REGISTER_ROUTE");
+}
+
+const DEFAULT_LOGGED_IN_ROUTE = process.env.DEFAULT_LOGGED_IN_ROUTE || "/chats";
+if (!process.env.DEFAULT_LOGGED_IN_ROUTE) {
+  console.warn(
+    "Environment Variables doesnot contain: DEFAULT_LOGGED_IN_ROUTE\n\tUsing default: /chats"
+  );
+  // _absent_envs.push("DEFAULT_LOGGED_IN_ROUTE");
+}
+
 export {
   APP_NAME,
   NEXTAUTH_URL,
@@ -114,4 +148,8 @@ export {
   AUTH_GITHUB_SECRET,
   AUTH_AZURE_AD_ID,
   AUTH_AZURE_AD_SECRET,
+  DEFAULT_LOGIN_ROUTE,
+  DEFAULT_REGISTER_ROUTE,
+  DEFAULT_PASSKEY_REGISTER_ROUTE,
+  DEFAULT_LOGGED_IN_ROUTE,
 };

@@ -1,6 +1,6 @@
 import { auth, signIn } from "@/auth";
-import LoginForm from "@/components/custom/login-form";
-import PasskeyLoginForm from "@/components/custom/passkey-login-form";
+import LoginForm from "@/app/(auth)/login/components/login-form";
+import PasskeyLoginForm from "@/app/(auth)/login/components/passkey-login-form";
 import { Github } from "@/components/svgs/github";
 import { Google } from "@/components/svgs/google";
 import { Microsoft } from "@/components/svgs/microsoft";
@@ -12,12 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_REGISTER_ROUTE } from "@/lib/environment-variables";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Login() {
   const session = await auth();
-  if (session) redirect("/query");
+  if (session) redirect(DEFAULT_LOGGED_IN_ROUTE);
 
   return (
     <Card>
@@ -35,7 +36,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("microsoft-entra-id", { redirectTo: "/query" });
+                await signIn("microsoft-entra-id", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -49,7 +50,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: "/query" });
+                await signIn("google", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -63,7 +64,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("github", { redirectTo: "/query" });
+                await signIn("github", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -88,7 +89,7 @@ export default async function Login() {
 
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="underline underline-offset-4">
+            <Link href={DEFAULT_REGISTER_ROUTE} className="underline underline-offset-4">
               Sign up
             </Link>
           </div>

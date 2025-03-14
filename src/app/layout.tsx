@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "antialiased border-border outline-ring/50 bg-background text-foreground",
+          "antialiased border-border outline-ring/50 bg-background text-foreground scrollbar-none",
           poppins.className
         )}
       >

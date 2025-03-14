@@ -6,12 +6,13 @@ import { signOut } from "@/auth";
 import { Button } from "../ui/button";
 import { LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 
 export function AppTopbar({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 flex shrink-0 items-center justify-between gap-2 border-b bg-background/10 backdrop-blur-lg p-4",
+        "sticky top-0 flex shrink-0 items-center justify-between gap-2 border-b backdrop-blur-md p-4 h-(--header-height) z-50",
         className
       )}
     >
@@ -30,7 +31,7 @@ export function AppTopbar({ className }: { className?: string }) {
         <form
           action={async () => {
             "use server";
-            await signOut({ redirectTo: "/login" });
+            await signOut({ redirectTo: DEFAULT_LOGIN_ROUTE });
           }}
         >
           <Tooltip>

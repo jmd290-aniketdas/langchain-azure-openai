@@ -1,5 +1,5 @@
 import { auth, signIn } from "@/auth";
-import RegisterForm from "@/components/custom/register-form";
+import RegisterForm from "@/app/(auth)/register/components/register-form";
 import { Github } from "@/components/svgs/github";
 import { Google } from "@/components/svgs/google";
 import { Microsoft } from "@/components/svgs/microsoft";
@@ -11,12 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Register() {
   const session = await auth();
-  if (session) redirect("/query");
+  if (session) redirect(DEFAULT_LOGGED_IN_ROUTE);
 
   return (
     <Card>
@@ -34,7 +35,7 @@ export default async function Register() {
             <form
               action={async () => {
                 "use server";
-                await signIn("microsoft-entra-id", { redirectTo: "/query" });
+                await signIn("microsoft-entra-id", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -48,7 +49,7 @@ export default async function Register() {
             <form
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: "/query" });
+                await signIn("google", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -62,7 +63,7 @@ export default async function Register() {
             <form
               action={async () => {
                 "use server";
-                await signIn("github", { redirectTo: "/query" });
+                await signIn("github", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
               }}
               className="w-full"
             >
@@ -84,7 +85,7 @@ export default async function Register() {
 
           <div className="text-center text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="underline underline-offset-4">
+            <Link href={DEFAULT_LOGIN_ROUTE} className="underline underline-offset-4">
               Sign in
             </Link>
           </div>

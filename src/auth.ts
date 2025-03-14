@@ -7,6 +7,7 @@ import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { prisma } from "./lib/prisma";
 import { signInSchemaAuthParser } from "./lib/validators/signin-schema";
+import { DEFAULT_LOGIN_ROUTE, DEFAULT_REGISTER_ROUTE } from "./lib/environment-variables";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -52,5 +53,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   session: { strategy: "jwt" },
-  pages: { signIn: "/login", newUser: "/register", signOut: "/logout" },
+  pages: { signIn: DEFAULT_LOGIN_ROUTE, newUser: DEFAULT_REGISTER_ROUTE, signOut: "/logout" },
 });
