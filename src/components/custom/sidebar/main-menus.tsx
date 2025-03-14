@@ -1,3 +1,5 @@
+"use client";
+
 import { fetchMainSidebarMenuContent } from "@/actions/menus.actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,6 +18,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Logo from "../logo";
 import { getAbbreviatedName } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+
+const pathnameMap = [
+  { id: "chats", activeMenu: "Chats" },
+  { id: "folders", activeMenu: "Folders" },
+  { id: "settings", activeMenu: "Settings" },
+];
 
 export function MainMenus({
   session,
@@ -28,6 +37,8 @@ export function MainMenus({
     React.SetStateAction<MainSidebarMenuContent | undefined>
   >;
 }) {
+  const pathname = usePathname();
+
   const [mainSidebarMenuContent, setMainMenuSidebarContent] = useState<
     MainSidebarMenuContent[]
   >([]);
@@ -36,7 +47,13 @@ export function MainMenus({
     fetchMainSidebarMenuContent()
       .then((res) => {
         setMainMenuSidebarContent(res);
-        setActiveMenu(res[0]);
+
+        const currentActivePath = pathname.split("/")[1];
+        const activeMenu = pathnameMap.find((m) => m.id === currentActivePath);
+        const activeMenuObj = res.find(
+          (r) => r.name === activeMenu?.activeMenu
+        );
+        setActiveMenu(activeMenuObj);
       })
       .catch((err) => toast.error(err.message));
   }, []);

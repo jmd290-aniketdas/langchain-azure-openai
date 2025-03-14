@@ -31,7 +31,7 @@ export const mainSidebarMenuContent: MainSidebarMenuContent[] = [
     action: {
         icon: Plus,
         tag: "New Folder",
-        link: "/create_folder",
+        link: "/folders/create",
     },
   },
   {
