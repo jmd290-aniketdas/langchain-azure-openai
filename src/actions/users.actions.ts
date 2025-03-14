@@ -68,7 +68,9 @@ const fetchUserLinkedAccountProviders = async (
   }
 };
 
-const fetchUserAuthenticators = async (email: string): Promise<Authenticator[]> => {
+const fetchUserAuthenticators = async (
+  email: string
+): Promise<Authenticator[]> => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -86,9 +88,27 @@ const fetchUserAuthenticators = async (email: string): Promise<Authenticator[]> 
   }
 };
 
+const changeUserName = async (email: string, newName: string) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("User not found");
+
+    const upd_user = await prisma.user.update({
+      where: { email },
+      data: { name: newName },
+    });
+    if (!upd_user) throw new Error("Failed to update User Name");
+
+    return "Name changed successfully";
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   deleteUser,
   changePassword,
   fetchUserLinkedAccountProviders,
   fetchUserAuthenticators,
+  changeUserName,
 };

@@ -10,7 +10,7 @@ import { ProfileInformation } from "./components/profile_information";
 
 export default async function AccountSettings() {
   const session = await auth();
-  if (!session) {
+  if (!session || !session.user) {
     redirect(DEFAULT_LOGIN_ROUTE);
   }
 
@@ -29,7 +29,7 @@ export default async function AccountSettings() {
               </span>
             }
           >
-            <ProfileInformation session={session} />
+            <ProfileInformation user={session.user} />
           </HeaderSection>
 
           <HeaderSection
