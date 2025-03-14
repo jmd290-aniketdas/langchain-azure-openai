@@ -8,6 +8,7 @@ import { LinkedAccounts } from "./components/linked_accounts";
 import { ProfileInformation } from "./components/profile_information";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { HeaderSection } from "@/components/custom/header-section";
 
 export default async function AccountSettings() {
   const session = await auth();
@@ -22,47 +23,25 @@ export default async function AccountSettings() {
           Account Settings
         </h1>
         <section className="space-y-12">
-          <section className="space-y-4">
-            <section className="space-y-1">
-              <h2 className="text tracking-wider text-muted-foreground">
-                Profile Information
-              </h2>
-              <Separator />
-            </section>
+          <HeaderSection header="Profile Information">
             <ProfileInformation session={session} />
-          </section>
+          </HeaderSection>
 
-          <section className="space-y-4">
-            <section className="space-y-1">
-              <h2 className="text tracking-wider text-muted-foreground">
-                Change Password
-              </h2>
-              <Separator />
-            </section>
+          <HeaderSection header="Change Password">
             <ChangePassword session={session} />
-          </section>
+          </HeaderSection>
 
-          <section className="space-y-4">
-            <section className="space-y-1">
-              <h2 className="text tracking-wider text-muted-foreground">
-                Linked Accounts
-              </h2>
-              <Separator />
-            </section>
-            <Suspense fallback={<Loader2 className="animate-spin place-self-center" />}>
+          <HeaderSection header="Linked Accounts">
+            <Suspense
+              fallback={<Loader2 className="animate-spin place-self-center" />}
+            >
               <LinkedAccounts session={session} />
             </Suspense>
-          </section>
+          </HeaderSection>
 
-          <section className="space-y-4">
-            <section className="space-y-1">
-              <h2 className="text tracking-wider text-muted-foreground">
-                Delete Account
-              </h2>
-              <Separator />
-            </section>
+          <HeaderSection header="Delete Account">
             <DeleteAccount session={session} />
-          </section>
+          </HeaderSection>
         </section>
       </section>
     </main>
