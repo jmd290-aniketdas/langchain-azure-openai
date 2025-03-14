@@ -13,7 +13,7 @@ export function HeaderSection({
   return (
     <section className={cn("space-y-4", className)}>
       <section className="space-y-1">
-        <h2 className="text tracking-wider text-muted-foreground">{header}</h2>
+        <section className="text tracking-wider text-muted-foreground">{header}</section>
         <Separator />
       </section>
       {children}

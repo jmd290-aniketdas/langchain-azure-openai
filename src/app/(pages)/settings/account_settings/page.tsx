@@ -1,14 +1,12 @@
 import { auth } from "@/auth";
-import { Separator } from "@/components/ui/separator";
+import { HeaderSection } from "@/components/custom/header-section";
 import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
+import { Info, Link, Loader2, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
-import { ChangePassword } from "./components/change_password";
+import { Suspense } from "react";
 import { DeleteAccount } from "./components/delete_account";
 import { LinkedAccounts } from "./components/linked_accounts";
 import { ProfileInformation } from "./components/profile_information";
-import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
-import { HeaderSection } from "@/components/custom/header-section";
 
 export default async function AccountSettings() {
   const session = await auth();
@@ -23,15 +21,25 @@ export default async function AccountSettings() {
           Account Settings
         </h1>
         <section className="space-y-12">
-          <HeaderSection header="Profile Information">
+          <HeaderSection
+            header={
+              <span className="flex gap-2 items-center">
+                <Info className="size-4" />
+                <p>Profile Information</p>
+              </span>
+            }
+          >
             <ProfileInformation session={session} />
           </HeaderSection>
 
-          <HeaderSection header="Change Password">
-            <ChangePassword session={session} />
-          </HeaderSection>
-
-          <HeaderSection header="Linked Accounts">
+          <HeaderSection
+            header={
+              <span className="flex gap-2 items-center">
+                <Link className="size-4" />
+                <p>Linked Accounts</p>
+              </span>
+            }
+          >
             <Suspense
               fallback={<Loader2 className="animate-spin place-self-center" />}
             >
@@ -39,7 +47,14 @@ export default async function AccountSettings() {
             </Suspense>
           </HeaderSection>
 
-          <HeaderSection header="Delete Account">
+          <HeaderSection
+            header={
+              <span className="flex gap-2 items-center">
+                <Trash2 className="size-4" />
+                <p>Delete Account</p>
+              </span>
+            }
+          >
             <DeleteAccount session={session} />
           </HeaderSection>
         </section>

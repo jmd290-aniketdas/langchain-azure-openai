@@ -54,3 +54,10 @@ export function getAbbreviatedName(str?: string) {
     .map((w) => w[0])
     .join("");
 }
+
+export function camelToCapitalized(str: string): string {
+  return str
+    .replace(/([A-Z])/g, " $1") // Add space before capital letters
+    .replace(/^./, (char) => char.toUpperCase()) // Capitalize first letter
+    .trim();
+}

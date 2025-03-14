@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { PasswordUpdateSchema } from "@/lib/validators/password-update-schema";
+import { Authenticator } from "@/types/users.types";
 import bcrypt from "bcryptjs";
 
 // ! NextAuth doesnot populate ID of the user from the database in the session object, use Email Address instead of the ID to query user from database
@@ -17,7 +18,10 @@ const deleteUser = async (email: string) => {
   }
 };
 
-const changePassword = async (email: string, data: PasswordUpdateSchema) => {
+const changePassword = async (
+  email: string,
+  data: PasswordUpdateSchema
+): Promise<string> => {
   const { password, cnfPassword } = data;
 
   if (password !== cnfPassword) {
@@ -47,7 +51,9 @@ const changePassword = async (email: string, data: PasswordUpdateSchema) => {
   }
 };
 
-const fetchUserLinkedAccountProviders = async (email: string) => {
+const fetchUserLinkedAccountProviders = async (
+  email: string
+): Promise<string[]> => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -62,4 +68,27 @@ const fetchUserLinkedAccountProviders = async (email: string) => {
   }
 };
 
-export { deleteUser, changePassword, fetchUserLinkedAccountProviders };
+const fetchUserAuthenticators = async (email: string): Promise<Authenticator[]> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { Authenticator: true },
+    });
+    if (!user) throw new Error("User not found");
+
+    const authenticators = user.Authenticator.map((a) => ({
+      credentialDeviceType: a.credentialDeviceType,
+      counter: a.counter,
+    }));
+    return authenticators;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export {
+  deleteUser,
+  changePassword,
+  fetchUserLinkedAccountProviders,
+  fetchUserAuthenticators,
+};
