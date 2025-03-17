@@ -12,24 +12,24 @@ import { camelToCapitalized, cn } from "@/lib/utils";
 import { Authenticator } from "@/types/users.types";
 import { startRegistration } from "@simplewebauthn/browser";
 import { Fingerprint, KeyRound, Loader2 } from "lucide-react";
-import { Session } from "next-auth";
+import { User } from "next-auth";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function RegisterPasskey({ session }: { session: Session }) {
+export function RegisterPasskey({ user }: { user: User }) {
   const [authenticators, setAuthenticators] = useState<Authenticator[]>([]);
   const [loadingAuthenticators, setLoadingAutheticators] =
     useState<boolean>(true);
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!session.user?.email) {
+    if (!user?.email) {
       toast.error("No Email present in session user");
       setLoadingAutheticators(false);
       return;
     }
 
-    fetchUserAuthenticators(session.user.email)
+    fetchUserAuthenticators(user.email)
       .then((res) => setAuthenticators(res))
       .catch((e) => {
         console.error(e.message);
@@ -41,25 +41,23 @@ export function RegisterPasskey({ session }: { session: Session }) {
   const onClick = async () => {
     setSubmitting(true);
     try {
-      if (!session.user?.email) {
+      if (!user?.email) {
         toast.error("No Email present in session user");
         return;
       }
 
-      const optionsJSON = await generateWebAuthNRegistrationOptions(
-        session.user.email
-      );
+      const optionsJSON = await generateWebAuthNRegistrationOptions(user.email);
       const attestation = await startRegistration({ optionsJSON });
       const verification = await verifyWebAuthNRegistrationResponse(
-        session.user.email,
+        user.email,
         attestation,
         optionsJSON
       );
-      await saveWebAuthNRegistrationResponse(session.user.email, verification);
+      await saveWebAuthNRegistrationResponse(user.email, verification);
 
       toast.success("Successfully Registered with Passkey");
 
-      const authenticators = await fetchUserAuthenticators(session.user.email);
+      const authenticators = await fetchUserAuthenticators(user.email);
       setAuthenticators(authenticators);
     } catch (error) {
       const e = error as Error;

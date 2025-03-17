@@ -20,6 +20,8 @@ export const signInSchemaAuthParser = z
       .email("Please provide a valid email address"),
     password: z.string().optional(),
     credentialId: z.string().optional(),
+    totp: z.string().max(6).optional(),
+    backupCode: z.string().max(16).optional(),
   })
   .refine((data) => data.password || data.credentialId, {
     message: "Either password or credentialId is required",

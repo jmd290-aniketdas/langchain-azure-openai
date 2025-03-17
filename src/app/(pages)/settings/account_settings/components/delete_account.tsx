@@ -15,8 +15,10 @@ export function DeleteAccount({ session }: { session: Session }) {
     try {
       if (!session.user?.email)
         throw new Error("No Email present in session user");
-      const res = await deleteUser(session.user.email);
-      toast.success(res + "\nYou will be logged out shortly.");
+      await deleteUser(session.user.email);
+      toast.success(
+        "Accout deleted successfully. You will be logged out shortly."
+      );
       await userSignOut();
     } catch (error) {
       const e = error as Error;

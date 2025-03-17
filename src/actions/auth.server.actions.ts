@@ -7,6 +7,7 @@ import {
   NEXTAUTH_URL,
 } from "@/lib/environment-variables";
 import { prisma } from "@/lib/prisma";
+import { generateBackupCode } from "@/lib/utils";
 import { RegisterSchema } from "@/lib/validators/register-schema";
 import { SignInSchema } from "@/lib/validators/signin-schema";
 import {
@@ -21,71 +22,102 @@ import {
 } from "@simplewebauthn/server";
 import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import bcrypt from "bcryptjs";
+import { authenticator, totp } from "otplib";
+import QRCode from "qrcode";
 
 const credentialsSignIn = async (data: SignInSchema) => {
   "use server";
-  const formData = new FormData();
-  formData.append("email", data.email);
-  formData.append("password", data.password);
+  try {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("password", data.password);
 
-  await signIn("credentials", formData);
+    await signIn("credentials", formData);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const credentialSignInWithMFA = async (
+  data: SignInSchema & { totp: string; backupCode: string }
+) => {
+  "use server";
+  try {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    if (data.totp) formData.append("totp", data.totp);
+    if (data.backupCode) formData.append("backupCode", data.backupCode);
+
+    await signIn("credentials", formData);
+  } catch (error) {
+    throw error;
+  }
 };
 
 const credentialsRegister = async (data: RegisterSchema) => {
   "use server";
-  const { name, email, password, cnfPassword } = data;
+  try {
+    const { name, email, password, cnfPassword } = data;
 
-  if (!name || !email || !password || !cnfPassword)
-    throw new Error("All fields are required");
+    if (!name || !email || !password || !cnfPassword)
+      throw new Error("All fields are required");
 
-  if (password !== cnfPassword) throw new Error("Passwords do not match");
+    if (password !== cnfPassword) throw new Error("Passwords do not match");
 
-  const passwordHash = bcrypt.hashSync(password);
+    const passwordHash = bcrypt.hashSync(password);
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-  if (user) throw new Error("User already exists. Please Login...");
+    if (user) throw new Error("User already exists. Please Login...");
 
-  const newUser = await prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash,
-    },
-  });
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+      },
+    });
 
-  if (!newUser) throw new Error("User not created");
+    if (!newUser) throw new Error("User not created");
 
-  return newUser;
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const generateWebAuthNRegistrationOptions = async (email: string) => {
   "use server";
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Register user first");
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("Register user first");
 
-  const authenticators = await prisma.authenticator.findMany({
-    where: {
-      userId: user.id,
-    },
-  });
+    const authenticators = await prisma.authenticator.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
 
-  const options = await generateRegistrationOptions({
-    rpName: APP_NAME,
-    rpID: new URL(NEXTAUTH_URL).hostname,
-    userID: isoUint8Array.fromUTF8String(user.id),
-    userName: user.email,
-    userDisplayName: user.name ? user.name : undefined,
-    attestationType: "direct",
-    excludeCredentials: authenticators.map((auth) => ({
-      id: auth.credentialID,
-      transports: auth.transports ? JSON.parse(auth.transports) : [],
-    })),
-  });
+    const options = await generateRegistrationOptions({
+      rpName: APP_NAME,
+      rpID: new URL(NEXTAUTH_URL).hostname,
+      userID: isoUint8Array.fromUTF8String(user.id),
+      userName: user.email,
+      userDisplayName: user.name ? user.name : undefined,
+      attestationType: "direct",
+      excludeCredentials: authenticators.map((auth) => ({
+        id: auth.credentialID,
+        transports: auth.transports ? JSON.parse(auth.transports) : [],
+      })),
+    });
 
-  return options;
+    return options;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const verifyWebAuthNRegistrationResponse = async (
@@ -94,10 +126,10 @@ const verifyWebAuthNRegistrationResponse = async (
   options: PublicKeyCredentialCreationOptionsJSON
 ) => {
   "use server";
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Register user first");
-
   try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("Register user first");
+
     const verification = await verifyRegistrationResponse({
       response: attestation,
       expectedChallenge: options.challenge,
@@ -118,63 +150,66 @@ const saveWebAuthNRegistrationResponse = async (
   verificationDetails: VerifiedRegistrationResponse
 ) => {
   "use server";
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("Register user first");
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Register user first");
+    if (!verificationDetails.verified) throw new Error("Passkey not verified");
 
-  if (!verificationDetails.verified) throw new Error("Passkey not verified");
+    if (!verificationDetails.registrationInfo)
+      throw new Error("Empty Registration Info");
 
-  if (!verificationDetails.registrationInfo)
-    throw new Error("Empty Registration Info");
+    const credentialID: string =
+      verificationDetails.registrationInfo.credential.id;
+    const userId: string = user.id;
+    const providerAccountId: string = user.email;
+    const credentialPublicKey: string = isoBase64URL.fromBuffer(
+      verificationDetails.registrationInfo.credential.publicKey
+    );
+    const counter: number =
+      verificationDetails.registrationInfo.credential.counter;
+    const credentialDeviceType: string =
+      verificationDetails.registrationInfo.credentialDeviceType;
+    const credentialBackedUp: boolean =
+      verificationDetails.registrationInfo.credentialBackedUp;
+    const transports: string = JSON.stringify(
+      verificationDetails.registrationInfo.credential.transports
+    );
 
-  const credentialID: string =
-    verificationDetails.registrationInfo.credential.id;
-  const userId: string = user.id;
-  const providerAccountId: string = user.email;
-  const credentialPublicKey: string = isoBase64URL.fromBuffer(
-    verificationDetails.registrationInfo.credential.publicKey
-  );
-  const counter: number =
-    verificationDetails.registrationInfo.credential.counter;
-  const credentialDeviceType: string =
-    verificationDetails.registrationInfo.credentialDeviceType;
-  const credentialBackedUp: boolean =
-    verificationDetails.registrationInfo.credentialBackedUp;
-  const transports: string = JSON.stringify(
-    verificationDetails.registrationInfo.credential.transports
-  );
-
-  const db_credentials = await prisma.authenticator.upsert({
-    where: {
-      userId_credentialID: {
-        userId,
-        credentialID,
+    const db_credentials = await prisma.authenticator.upsert({
+      where: {
+        userId_credentialID: {
+          userId,
+          credentialID,
+        },
       },
-    },
-    update: {
-      credentialID,
-      providerAccountId,
-      credentialPublicKey,
-      counter,
-      credentialDeviceType,
-      credentialBackedUp,
-      transports,
-    },
-    create: {
-      credentialID,
-      userId,
-      providerAccountId,
-      credentialPublicKey,
-      counter,
-      credentialDeviceType,
-      credentialBackedUp,
-      transports,
-    },
-  });
+      update: {
+        credentialID,
+        providerAccountId,
+        credentialPublicKey,
+        counter,
+        credentialDeviceType,
+        credentialBackedUp,
+        transports,
+      },
+      create: {
+        credentialID,
+        userId,
+        providerAccountId,
+        credentialPublicKey,
+        counter,
+        credentialDeviceType,
+        credentialBackedUp,
+        transports,
+      },
+    });
 
-  if (!db_credentials) throw new Error("Cannot create WebAuthN Credentials");
+    if (!db_credentials) throw new Error("Cannot create WebAuthN Credentials");
 
-  return db_credentials;
+    return db_credentials;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const generateWebAuthNAuthenticationOptions = async () => {
@@ -255,11 +290,15 @@ const saveWebAuthNAutenticationResponse = async (
 
 const passkeySignIn = async (data: { email: string; credentialId: string }) => {
   "use server";
-  const formData = new FormData();
-  formData.append("email", data.email);
-  formData.append("credentialId", data.credentialId);
+  try {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("credentialId", data.credentialId);
 
-  await signIn("credentials", formData);
+    await signIn("credentials", formData);
+  } catch (error) {
+    throw error;
+  }
 };
 
 const userSignOut = async () => {
@@ -267,15 +306,72 @@ const userSignOut = async () => {
   await signOut({ redirectTo: DEFAULT_LOGIN_ROUTE });
 };
 
+const MFASecretGenerate = async (email: string) => {
+  "use server";
+  try {
+    const secret = authenticator.generateSecret();
+    const otpauthUrl = totp.keyuri(email, APP_NAME, secret);
+    const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl);
+    return {
+      secret,
+      otpauthUrl,
+      qrCodeDataURL,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const MFATokenVerify = async (token: string, email: string) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("User not found");
+    if (!user.twoFactorEnabled || !user.twoFactorSecret)
+      throw new Error("MFA is not enabled by user. No secret found.");
+
+    const verified = authenticator.check(token, user.twoFactorSecret);
+    return verified;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const MFAActivate = async (token: string, secret: string, email: string) => {
+  "use server";
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("User not found");
+
+    const verification = authenticator.check(token, secret);
+    if (!verification) throw new Error("Token not verified");
+
+    const backupCodes = generateBackupCode();
+
+    const upd_user = await prisma.user.update({
+      where: { email },
+      data: { twoFactorSecret: secret, twoFactorEnabled: true, backupCodes },
+    });
+    if (!upd_user) throw new Error("Failed to update 2FA Secret");
+
+    return upd_user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
+  credentialSignInWithMFA,
   credentialsRegister,
   credentialsSignIn,
   generateWebAuthNAuthenticationOptions,
   generateWebAuthNRegistrationOptions,
+  MFAActivate,
+  MFASecretGenerate,
+  MFATokenVerify,
   passkeySignIn,
   saveWebAuthNAutenticationResponse,
   saveWebAuthNRegistrationResponse,
+  userSignOut,
   verifyWebAuthNAuthenticationResponse,
   verifyWebAuthNRegistrationResponse,
-  userSignOut,
 };

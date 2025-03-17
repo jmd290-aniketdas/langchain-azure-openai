@@ -61,3 +61,26 @@ export function camelToCapitalized(str: string): string {
     .replace(/^./, (char) => char.toUpperCase()) // Capitalize first letter
     .trim();
 }
+
+export const DEFAULT_BACKUP_CODE_SEGMENT_LENGTH = 3;
+export function generateBackupCode(segmentLength?: number) {
+  const segments = new Uint16Array(
+    segmentLength || DEFAULT_BACKUP_CODE_SEGMENT_LENGTH
+  );
+  crypto.getRandomValues(segments);
+
+  const backupCode = Array.from(segments)
+    .map((num) => num.toString(16).padStart(4, "0"))
+    .join("")
+    .toUpperCase();
+
+  return backupCode;
+}
+
+export async function copyToClipboard(textToCopy: string) {
+  try {
+    await navigator.clipboard.writeText(textToCopy);
+  } catch (error) {
+    throw error;
+  }
+}

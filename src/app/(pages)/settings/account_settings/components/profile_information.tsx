@@ -70,7 +70,7 @@ function UpdateUsernameDialogTrigger({
   const onClick = async () => {
     try {
       const res = await changeUserName(email, newName);
-      toast.success(res);
+      toast.success("Username changed successfully");
     } catch (error) {
       console.error(error);
       toast.error((error as Error).message);

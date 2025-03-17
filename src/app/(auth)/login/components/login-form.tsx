@@ -1,17 +1,23 @@
 "use client";
 
-import { credentialsSignIn } from "@/actions/auth.server.actions";
+import {
+  credentialSignInWithMFA,
+  credentialsSignIn,
+} from "@/actions/auth.server.actions";
+import { is2FAEnabled } from "@/actions/users.actions";
+import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
 import { cn } from "@/lib/utils";
 import { signInSchema, SignInSchema } from "@/lib/validators/signin-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
-import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
+import { MultiFactorAuthDialog } from "./multi-factor-auth-dialog";
 
 export default function LoginForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -23,10 +29,60 @@ export default function LoginForm({ className }: { className?: string }) {
     resolver: zodResolver(signInSchema),
     mode: "onChange",
   });
+  const [TOTPDialogOpen, setTOTPDialogOpen] = useState<boolean>(false);
+  const totpPromiseResolver = useRef<
+    | (({ totp, backupCode }: { totp: string; backupCode: string }) => void)
+    | null
+  >(null);
+
+  // Function that returns a promise which resolves with the totp value
+  const waitForTOTP = () => {
+    return new Promise<{ totp: string; backupCode: string }>((resolve) => {
+      totpPromiseResolver.current = resolve;
+      setTOTPDialogOpen(true);
+    });
+  };
+
+  // Call this when the dialog is submitted
+  const handleTOTPSubmit = ({
+    totp,
+    backupCode,
+  }: {
+    totp: string;
+    backupCode: string;
+  }) => {
+    if (totpPromiseResolver.current) {
+      totpPromiseResolver.current({ totp, backupCode });
+      totpPromiseResolver.current = null;
+    }
+    setTOTPDialogOpen(false);
+  };
+
+  // Effect to cancel waiting if the dialog is closed externally
+  useEffect(() => {
+    if (!TOTPDialogOpen && totpPromiseResolver.current) {
+      // Resolve with an empty string to indicate cancellation
+      totpPromiseResolver.current({ totp: "", backupCode: "" });
+      totpPromiseResolver.current = null;
+    }
+  }, [TOTPDialogOpen]);
 
   const onSubmit = async (data: SignInSchema) => {
     try {
-      await credentialsSignIn(data);
+      const multiFactorEnabled = await is2FAEnabled(data.email);
+      if (multiFactorEnabled) {
+        const { totp, backupCode } = await waitForTOTP();
+        if (!totp && !backupCode)
+          throw new Error(
+            "TOTP or Backup Code input was canceled or not provided."
+          );
+        await credentialSignInWithMFA({ ...data, totp, backupCode });
+      } else {
+        await credentialsSignIn(data);
+      }
+
+      toast.success("Successfully Signed In with Credentials");
+      router.push(DEFAULT_LOGGED_IN_ROUTE);
     } catch (error) {
       const e = error as Error;
       if (e.message !== "NEXT_REDIRECT") {
@@ -34,9 +90,6 @@ export default function LoginForm({ className }: { className?: string }) {
         toast.error(e.message);
       }
     }
-    toast.success("Successfully Signed In with Credentials");
-
-    router.push(DEFAULT_LOGGED_IN_ROUTE);
   };
 
   return (
@@ -87,6 +140,12 @@ export default function LoginForm({ className }: { className?: string }) {
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? <Loader2 className="animate-spin" /> : "Login"}
       </Button>
+
+      <MultiFactorAuthDialog
+        open={TOTPDialogOpen}
+        setOpen={setTOTPDialogOpen}
+        onSubmit={handleTOTPSubmit}
+      />
     </form>
   );
 }

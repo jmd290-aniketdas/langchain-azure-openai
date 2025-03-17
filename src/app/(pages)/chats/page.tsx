@@ -1,12 +1,12 @@
 import { auth, signOut } from "@/auth";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
+import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 import { redirect } from "next/navigation";
 
 export default async function Query() {
   const session = await auth();
-  if (!session) redirect(DEFAULT_LOGGED_IN_ROUTE);
+  if (!session) redirect(DEFAULT_LOGIN_ROUTE);
 
   return (
     <main className="relative h-full">
