@@ -1,4 +1,5 @@
-import { auth, signOut } from "@/auth";
+import { userSignOut } from "@/actions/auth.server.actions";
+import { auth } from "@/auth";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
@@ -13,12 +14,7 @@ export default async function Query() {
       <section className="size-full flex flex-col items-center justify-center gap-3">
         <h1 className="capitalize text-9xl font-extrabold text-muted">Chats</h1>
         <ThemeToggle />
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: DEFAULT_LOGIN_ROUTE });
-          }}
-        >
+        <form action={userSignOut}>
           <Button type="submit" variant="outline">
             Sign Out
           </Button>

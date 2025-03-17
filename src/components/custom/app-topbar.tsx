@@ -1,12 +1,10 @@
+import { userSignOut } from "@/actions/auth.server.actions";
 import { cn } from "@/lib/utils";
-import { Separator } from "../ui/separator";
-import { SidebarTrigger } from "../ui/sidebar";
-import { ThemeToggle } from "./theme-toggle";
-import { signOut } from "@/auth";
-import { Button } from "../ui/button";
 import { LogOut } from "lucide-react";
+import { Button } from "../ui/button";
+import { SidebarTrigger } from "../ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
+import { ThemeToggle } from "./theme-toggle";
 
 export function AppTopbar({ className }: { className?: string }) {
   return (
@@ -28,12 +26,7 @@ export function AppTopbar({ className }: { className?: string }) {
       <section className="flex gap-3 items-center">
         <ThemeToggle className="size-7" />
 
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: DEFAULT_LOGIN_ROUTE });
-          }}
-        >
+        <form action={userSignOut}>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button type="submit" variant="outline" className="size-7">
