@@ -22,37 +22,43 @@ import { toast } from "sonner";
 
 export function ProfileInformation({ user }: { user: User }) {
   return (
-    <section className="flex gap-6 md:gap-16 items-center">
-      <Avatar className="size-16 md:size-32 rounded-2xl relative">
-        <AvatarImage src={user.image ?? undefined} />
-        <AvatarFallback className="text-2xl md:text-5xl">
-          {getAbbreviatedName(user.name ?? undefined)}
-        </AvatarFallback>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute bottom-1 right-1"
-        >
-          <PenLine className="size-3" />
-          <p className="sr-only">Edit</p>
-          {/* TODO: Edit for images is left; no storage location to store the images yet */}
-        </Button>
-      </Avatar>
+    <section className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        View and update your name, email, and profile picture to keep your
+        account details up to date.
+      </p>
+      <section className="flex gap-6 md:gap-16 items-center">
+        <Avatar className="size-16 md:size-32 rounded-2xl relative">
+          <AvatarImage src={user.image ?? undefined} />
+          <AvatarFallback className="text-2xl md:text-5xl">
+            {getAbbreviatedName(user.name ?? undefined)}
+          </AvatarFallback>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute bottom-1 right-1"
+          >
+            <PenLine className="size-3" />
+            <p className="sr-only">Edit</p>
+            {/* TODO: Edit for images is left; no storage location to store the images yet */}
+          </Button>
+        </Avatar>
 
-      <section className="space-y-3 w-full">
-        <section className="w-full flex justify-between items-center">
-          <section>
-            <p className="font-medium text-xs text-muted-foreground">Name</p>
-            <p>{user?.name}</p>
+        <section className="space-y-3 w-full">
+          <section className="w-full flex justify-between items-center">
+            <section>
+              <p className="font-medium text-xs text-muted-foreground">Name</p>
+              <p>{user?.name}</p>
+            </section>
+            <UpdateUsernameDialogTrigger
+              name={user?.name ?? ""}
+              email={user?.email ?? ""}
+            />
           </section>
-          <UpdateUsernameDialogTrigger
-            name={user?.name ?? ""}
-            email={user?.email ?? ""}
-          />
-        </section>
-        <section>
-          <p className="font-medium text-xs text-muted-foreground">Email</p>
-          <p>{user?.email}</p>
+          <section>
+            <p className="font-medium text-xs text-muted-foreground">Email</p>
+            <p>{user?.email}</p>
+          </section>
         </section>
       </section>
     </section>

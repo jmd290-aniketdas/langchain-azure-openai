@@ -30,6 +30,10 @@ export function DeleteAccount({ session }: { session: Session }) {
   };
   return (
     <section className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Permanently delete your account and all associated data. This action
+        cannot be undone.
+      </p>
       <section className="flex gap-4 items-center">
         <Input
           type="checkbox"
