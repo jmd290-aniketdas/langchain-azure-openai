@@ -42,6 +42,10 @@ export function ChangePassword({ user }: { user: User }) {
       autoComplete="off"
       onSubmit={handleSubmit(onSubmit)}
     >
+      <p className="text-xs text-muted-foreground">
+        Keep your account secure by updating your password regularly. <br />
+        Use a mix of letters, numbers, and symbols to create a strong password.
+      </p>
       <section className="grid gap-2">
         <Label className="text-xs text-muted-foreground" htmlFor="password">
           New Password

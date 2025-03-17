@@ -72,6 +72,36 @@ export function RegisterPasskey({ user }: { user: User }) {
 
   return (
     <section className="space-y-4">
+      <section className="text-xs text-muted-foreground">
+        <p>
+          Passkeys provide a secure and password-free way to sign in to your
+          account.
+        </p>
+        <ol className="list-decimal list-inside">
+          <li>
+            <span className="font-medium text-primary">
+              Register Your Device
+            </span>{" "}
+            - Click the &apos;Register Passkey&apos; button below to securely
+            link your device to your account.
+          </li>
+          <li>
+            <span className="font-medium text-primary">
+              Confirm with Biometrics
+            </span>{" "}
+            - Use Face ID, Touch ID, or a security key to authenticate.
+          </li>
+          <li>
+            <span className="font-medium text-primary">Sign In Seamlessly</span>{" "}
+            - Next time, you can log in with your passkey without needing a
+            password.
+          </li>
+        </ol>
+        <p>
+          Passkeys are stored securely on your device and prevent phishing
+          attacks, making your account more secure.
+        </p>
+      </section>
       <section className="space-y-2">
         {loadingAuthenticators ? (
           <section className="flex gap-3 items-center min-w-64">
