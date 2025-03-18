@@ -70,7 +70,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "database" },
   pages: {
     signIn: DEFAULT_LOGIN_ROUTE,
     newUser: DEFAULT_REGISTER_ROUTE,
