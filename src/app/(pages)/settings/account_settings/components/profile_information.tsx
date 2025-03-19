@@ -16,11 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { getAbbreviatedName } from "@/lib/utils";
 import { PenLine } from "lucide-react";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function ProfileInformation({ user }: { user: User }) {
+export function ProfileInformation({ user }: { user: Session["user"] }) {
   return (
     <section className="space-y-4">
       <p className="text-xs text-muted-foreground">
@@ -31,7 +31,7 @@ export function ProfileInformation({ user }: { user: User }) {
         <Avatar className="size-16 md:size-32 rounded-2xl relative">
           <AvatarImage src={user.image ?? undefined} />
           <AvatarFallback className="text-2xl md:text-5xl">
-            {getAbbreviatedName(user.name ?? undefined)}
+            {getAbbreviatedName(user.name)}
           </AvatarFallback>
           <Button
             variant="ghost"
@@ -75,7 +75,7 @@ function UpdateUsernameDialogTrigger({
   const [newName, setNewName] = useState<string>(name);
   const onClick = async () => {
     try {
-      const res = await changeUserName(email, newName);
+      await changeUserName(email, newName);
       toast.success("Username changed successfully");
     } catch (error) {
       console.error(error);

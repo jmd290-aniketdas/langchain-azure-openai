@@ -11,11 +11,11 @@ import {
 } from "@/lib/validators/password-update-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export function ChangePassword({ user }: { user: User }) {
+export function ChangePassword({ user }: { user: Session["user"] }) {
   const {
     register,
     handleSubmit,
@@ -27,7 +27,6 @@ export function ChangePassword({ user }: { user: User }) {
 
   const onSubmit = async (data: PasswordUpdateSchema) => {
     try {
-      if (!user?.email) throw new Error("No Email present in session user");
       await changePassword(user.email, data);
       toast.success("Password changed successfully");
     } catch (error) {

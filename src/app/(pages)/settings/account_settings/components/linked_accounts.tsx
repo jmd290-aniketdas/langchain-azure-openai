@@ -17,10 +17,8 @@ import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
 export async function LinkedAccounts({ session }: { session: Session }) {
-  if (!session.user?.email) redirect(DEFAULT_LOGIN_ROUTE);
-
   const linkedAccountProviders = await fetchUserLinkedAccountProviders(
-    session.user?.email
+    session.user.email
   );
 
   const googleLinked = linkedAccountProviders.includes("google");

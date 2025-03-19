@@ -1,6 +1,6 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -12,6 +12,16 @@ import {
   DEFAULT_REGISTER_ROUTE,
 } from "./lib/environment-variables";
 import { MFATokenVerify } from "./actions/auth.server.actions";
+
+declare module "next-auth" {
+  interface Session extends DefaultSession {
+    user: {
+      name: string;
+      email: string;
+      image?: string | null;
+    };
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),

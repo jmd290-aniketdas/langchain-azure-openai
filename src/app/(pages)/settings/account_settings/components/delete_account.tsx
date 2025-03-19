@@ -13,8 +13,6 @@ export function DeleteAccount({ session }: { session: Session }) {
   const [consented, setConsented] = useState<boolean>(false);
   const onClick = async () => {
     try {
-      if (!session.user?.email)
-        throw new Error("No Email present in session user");
       await deleteUser(session.user.email);
       toast.success(
         "Accout deleted successfully. You will be logged out shortly."

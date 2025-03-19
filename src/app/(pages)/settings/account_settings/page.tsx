@@ -10,14 +10,12 @@ import { ProfileInformation } from "./components/profile_information";
 
 export default async function AccountSettings() {
   const session = await auth();
-  if (!session || !session.user) {
-    redirect(DEFAULT_LOGIN_ROUTE);
-  }
+  if (!session) redirect(DEFAULT_LOGIN_ROUTE);
 
   return (
     <main className="relative h-full w-full place-items-center py-4 px-12 md:px-6">
       <section className="max-w-256 w-full min-h-full space-y-6">
-        <h1 className="text-sm font-light text-muted-foreground">
+        <h1 className="text-2xl font-extralight text-muted-foreground">
           Account Settings
         </h1>
         <section className="space-y-12">

@@ -12,23 +12,17 @@ import { camelToCapitalized, cn } from "@/lib/utils";
 import { Authenticator } from "@/types/users.types";
 import { startRegistration } from "@simplewebauthn/browser";
 import { Fingerprint, KeyRound, Loader2 } from "lucide-react";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function RegisterPasskey({ user }: { user: User }) {
+export function RegisterPasskey({ user }: { user: Session["user"] }) {
   const [authenticators, setAuthenticators] = useState<Authenticator[]>([]);
   const [loadingAuthenticators, setLoadingAutheticators] =
     useState<boolean>(true);
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!user?.email) {
-      toast.error("No Email present in session user");
-      setLoadingAutheticators(false);
-      return;
-    }
-
     fetchUserAuthenticators(user.email)
       .then((res) => setAuthenticators(res))
       .catch((e) => {
@@ -41,11 +35,6 @@ export function RegisterPasskey({ user }: { user: User }) {
   const onClick = async () => {
     setSubmitting(true);
     try {
-      if (!user?.email) {
-        toast.error("No Email present in session user");
-        return;
-      }
-
       const optionsJSON = await generateWebAuthNRegistrationOptions(user.email);
       const attestation = await startRegistration({ optionsJSON });
       const verification = await verifyWebAuthNRegistrationResponse(

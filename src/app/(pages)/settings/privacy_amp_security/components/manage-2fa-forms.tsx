@@ -20,7 +20,7 @@ import {
 import { copyToClipboard } from "@/lib/utils";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { CircleCheck, Loader2 } from "lucide-react";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ export function Activate2FAForm({
   user,
 }: {
   secret: string;
-  user: User;
+  user: Session["user"];
 }) {
   const router = useRouter();
   const [totp, setTotp] = useState<string>("");
@@ -38,10 +38,6 @@ export function Activate2FAForm({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
-    if (!user.email) {
-      toast.error("User doesn't have registered email");
-      return;
-    }
     try {
       await MFAActivate(totp, secret, user.email);
       toast.success("2FA is activated via the Authenticator app");
@@ -143,14 +139,13 @@ export function Toggle2FAForm({
   is2FAEnabled,
   className,
 }: {
-  user: User;
+  user: Session["user"];
   is2FAEnabled: boolean;
   className?: string;
 }) {
   const [mfaStatus, setMfaStatus] = useState<boolean>(is2FAEnabled);
   const onCheckedChange = async (value: boolean) => {
     try {
-      if (!user.email) throw new Error("Email not available in logged in user");
       setMfaStatus(value);
       await set2FAStatus(user.email, value);
       toast.success(
@@ -184,13 +179,12 @@ export function Delete2FA({
   user,
   className,
 }: {
-  user: User;
+  user: Session["user"];
   className?: string;
 }) {
   const [consented, setConsented] = useState<boolean>(false);
   const onClick = async () => {
     try {
-      if (!user.email) throw new Error("Email not available in logged in user");
       await delete2FA(user.email);
       toast.success("Two Factor Authentication deleted successfully");
     } catch (error) {

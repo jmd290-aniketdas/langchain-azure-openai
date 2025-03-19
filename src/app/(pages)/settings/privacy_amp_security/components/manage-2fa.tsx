@@ -7,7 +7,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 import { Loader2 } from "lucide-react";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 import {
   Activate2FAForm,
@@ -16,8 +16,7 @@ import {
   Toggle2FAForm,
 } from "./manage-2fa-forms";
 
-export async function Manage2FA({ user }: { user: User }) {
-  if (!user.email) redirect(DEFAULT_LOGIN_ROUTE);
+export async function Manage2FA({ user }: { user: Session["user"] }) {
   const mfaSetup = await is2FASetup(user.email);
 
   if (mfaSetup) {
