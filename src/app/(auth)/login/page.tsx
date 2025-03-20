@@ -12,9 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_REGISTER_ROUTE } from "@/lib/environment-variables";
+import {
+  DEFAULT_LOGGED_IN_ROUTE,
+  DEFAULT_REGISTER_ROUTE,
+} from "@/lib/environment-variables";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { integratedSignIn } from "@/actions/auth.server.actions";
 
 export default async function Login() {
   const session = await auth();
@@ -36,7 +40,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("microsoft-entra-id", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
+                await integratedSignIn({ provider: "microsoft-entra-id" });
               }}
               className="w-full"
             >
@@ -50,7 +54,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
+                await integratedSignIn({ provider: "google" });
               }}
               className="w-full"
             >
@@ -64,7 +68,7 @@ export default async function Login() {
             <form
               action={async () => {
                 "use server";
-                await signIn("github", { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
+                await integratedSignIn({ provider: "github" });
               }}
               className="w-full"
             >
@@ -89,7 +93,10 @@ export default async function Login() {
 
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href={DEFAULT_REGISTER_ROUTE} className="underline underline-offset-4">
+            <Link
+              href={DEFAULT_REGISTER_ROUTE}
+              className="underline underline-offset-4"
+            >
               Sign up
             </Link>
           </div>

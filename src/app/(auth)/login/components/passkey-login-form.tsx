@@ -2,6 +2,7 @@
 
 import {
   generateWebAuthNAuthenticationOptions,
+  integratedSignIn,
   passkeySignIn,
   saveWebAuthNAutenticationResponse,
   verifyWebAuthNAuthenticationResponse,
@@ -41,9 +42,12 @@ export default function PasskeyLoginForm({
         verification
       );
 
-      await passkeySignIn({
-        email: authenticator_user.user.email,
-        credentialId: authenticator_user.credentialID,
+      await integratedSignIn({
+        provider: "credentialsPasskey",
+        credentialsPasskeyData: {
+          email: authenticator_user.user.email,
+          credentialId: authenticator_user.credentialID,
+        },
       });
 
       toast.success("Successfully Signed in with Passkey");
@@ -61,11 +65,7 @@ export default function PasskeyLoginForm({
     <Button
       type="submit"
       variant="outline"
-      className={cn(
-        "w-full",
-        className,
-        !isWebAuthNSupported && "hidden"
-      )}
+      className={cn("w-full", className, !isWebAuthNSupported && "hidden")}
       disabled={!isWebAuthNSupported}
       onClick={onClick}
     >

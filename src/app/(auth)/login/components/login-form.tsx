@@ -3,6 +3,7 @@
 import {
   credentialSignInWithMFA,
   credentialsSignIn,
+  integratedSignIn,
 } from "@/actions/auth.server.actions";
 import { is2FAEnabled } from "@/actions/users.actions";
 import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
@@ -76,9 +77,15 @@ export default function LoginForm({ className }: { className?: string }) {
           throw new Error(
             "TOTP or Backup Code input was canceled or not provided."
           );
-        await credentialSignInWithMFA({ ...data, totp, backupCode });
+        await integratedSignIn({
+          provider: "credentialsMFA",
+          credentialsMFAData: { ...data, totp, backupCode },
+        });
       } else {
-        await credentialsSignIn(data);
+        await integratedSignIn({
+          provider: "credentialsMFA",
+          credentialsData: data,
+        });
       }
 
       toast.success("Successfully Signed In with Credentials");

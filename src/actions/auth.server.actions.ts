@@ -3,6 +3,7 @@
 import { signIn, signOut } from "@/auth";
 import {
   APP_NAME,
+  DEFAULT_LOGGED_IN_ROUTE,
   DEFAULT_LOGIN_ROUTE,
   NEXTAUTH_URL,
 } from "@/lib/environment-variables";
@@ -24,6 +25,30 @@ import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import bcrypt from "bcryptjs";
 import { authenticator, totp } from "otplib";
 import QRCode from "qrcode";
+
+const integratedSignIn = async ({
+  provider,
+  credentialsData,
+  credentialsMFAData,
+  credentialsPasskeyData,
+}: {
+  provider: string;
+  credentialsData?: SignInSchema;
+  credentialsMFAData?: SignInSchema & { totp: string; backupCode: string };
+  credentialsPasskeyData?: { email: string; credentialId: string };
+}) => {
+  try {
+    if (provider === "credentials" && credentialsData)
+      await credentialsSignIn(credentialsData);
+    else if (provider === "credentialsMFA" && credentialsMFAData)
+      await credentialSignInWithMFA(credentialsMFAData);
+    else if (provider === "credentialsPasskey" && credentialsPasskeyData)
+      await passkeySignIn(credentialsPasskeyData);
+    else await signIn(provider, { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
+  } catch (error) {
+    throw error;
+  }
+};
 
 const credentialsSignIn = async (data: SignInSchema) => {
   "use server";
@@ -365,6 +390,7 @@ export {
   credentialsSignIn,
   generateWebAuthNAuthenticationOptions,
   generateWebAuthNRegistrationOptions,
+  integratedSignIn,
   MFAActivate,
   MFASecretGenerate,
   MFATokenVerify,
