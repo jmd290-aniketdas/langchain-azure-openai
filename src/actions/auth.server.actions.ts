@@ -3,9 +3,9 @@
 import { signIn, signOut } from "@/auth";
 import {
   APP_NAME,
-  DEFAULT_LOGGED_IN_ROUTE,
   DEFAULT_LOGIN_ROUTE,
-  NEXTAUTH_URL,
+  DEFAULT_PREPROCESS_ROUTE,
+  NEXTAUTH_URL
 } from "@/lib/environment-variables";
 import { prisma } from "@/lib/prisma";
 import { generateBackupCode } from "@/lib/utils";
@@ -44,7 +44,7 @@ const integratedSignIn = async ({
       await credentialSignInWithMFA(credentialsMFAData);
     else if (provider === "credentialsPasskey" && credentialsPasskeyData)
       await passkeySignIn(credentialsPasskeyData);
-    else await signIn(provider, { redirectTo: DEFAULT_LOGGED_IN_ROUTE });
+    else await signIn(provider, { redirectTo: DEFAULT_PREPROCESS_ROUTE });
   } catch (error) {
     throw error;
   }
@@ -399,5 +399,6 @@ export {
   saveWebAuthNRegistrationResponse,
   userSignOut,
   verifyWebAuthNAuthenticationResponse,
-  verifyWebAuthNRegistrationResponse,
+  verifyWebAuthNRegistrationResponse
 };
+

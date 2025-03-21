@@ -70,11 +70,11 @@ const fetchUserAuthenticators = async (
   try {
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { Authenticator: true },
+      include: { authenticator: true },
     });
     if (!user) throw new Error("User not found");
 
-    const authenticators = user.Authenticator.map((a) => ({
+    const authenticators = user.authenticator.map((a) => ({
       credentialDeviceType: a.credentialDeviceType,
       counter: a.counter,
     }));
@@ -168,6 +168,20 @@ const delete2FA = async (email: string) => {
   }
 };
 
+const fetchUserBucketName = async (email: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { bucket: true },
+    });
+    if (!user) throw new Error("User not found");
+    if (!user.bucket) throw new Error("User bucket does not exist");
+    return user.bucket.id;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   changePassword,
   changeUserName,
@@ -179,4 +193,5 @@ export {
   is2FAEnabled,
   is2FASetup,
   set2FAStatus,
+  fetchUserBucketName,
 };

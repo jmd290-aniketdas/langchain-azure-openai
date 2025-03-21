@@ -1,6 +1,7 @@
-import { auth, signIn } from "@/auth";
+import { integratedSignIn } from "@/actions/auth.server.actions";
 import LoginForm from "@/app/(auth)/login/components/login-form";
 import PasskeyLoginForm from "@/app/(auth)/login/components/passkey-login-form";
+import { auth } from "@/auth";
 import { Github } from "@/components/svgs/github";
 import { Google } from "@/components/svgs/google";
 import { Microsoft } from "@/components/svgs/microsoft";
@@ -13,16 +14,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  DEFAULT_LOGGED_IN_ROUTE,
+  DEFAULT_PREPROCESS_ROUTE,
   DEFAULT_REGISTER_ROUTE,
 } from "@/lib/environment-variables";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { integratedSignIn } from "@/actions/auth.server.actions";
 
 export default async function Login() {
   const session = await auth();
-  if (session) redirect(DEFAULT_LOGGED_IN_ROUTE);
+  if (session) redirect(DEFAULT_PREPROCESS_ROUTE);
 
   return (
     <Card>

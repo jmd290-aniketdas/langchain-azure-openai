@@ -5,6 +5,7 @@ import {
   saveWebAuthNRegistrationResponse,
   verifyWebAuthNRegistrationResponse,
 } from "@/actions/auth.server.actions";
+import { DEFAULT_PREPROCESS_ROUTE } from "@/lib/environment-variables";
 import { cn } from "@/lib/utils";
 import {
   browserSupportsWebAuthn,
@@ -13,10 +14,9 @@ import {
 import { Fingerprint } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "../../../../../components/ui/button";
-import { useEffect } from "react";
-import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
 
 export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
   const router = useRouter();
@@ -38,7 +38,7 @@ export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
       await saveWebAuthNRegistrationResponse(email, verification);
 
       toast.success("Successfully Registered with Passkey");
-      router.push(DEFAULT_LOGGED_IN_ROUTE);
+      router.push(DEFAULT_PREPROCESS_ROUTE);
     } catch (error) {
       const e = error as Error;
       if (e.message !== "NEXT_REDIRECT") {
@@ -50,7 +50,7 @@ export const PasskeyRegisterForm = ({ className }: { className?: string }) => {
   useEffect(() => {
     if (!browserSupportsWebAuthn()) {
       toast.warning("Browser doesnot support WebAuthN");
-      router.push(DEFAULT_LOGGED_IN_ROUTE);
+      router.push(DEFAULT_PREPROCESS_ROUTE);
     }
   }, []);
 

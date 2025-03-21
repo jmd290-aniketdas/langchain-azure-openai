@@ -132,24 +132,80 @@ if (!process.env.DEFAULT_LOGGED_IN_ROUTE) {
   // _absent_envs.push("DEFAULT_LOGGED_IN_ROUTE");
 }
 
+const DEFAULT_PREPROCESS_ROUTE =
+  process.env.DEFAULT_PREPROCESS_ROUTE || "/logged-in-preprocess";
+if (!process.env.DEFAULT_PREPROCESS_ROUTE) {
+  console.warn(
+    "Environment Variables doesnot contain: DEFAULT_PREPROCESS_ROUTE\n\tUsing default: /logged-in-preprocess"
+  );
+  // _absent_envs.push("DEFAULT_PREPROCESS_ROUTE");
+}
+
+const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT || "localhost";
+if (!process.env.MINIO_ENDPOINT) {
+  console.warn(
+    "Environment Variables doesnot contain: MINIO_ENDPOINT\n\tUsing default: localhost"
+  );
+  // _absent_envs.push("MINIO_ENDPOINT");
+}
+
+const MINIO_PORT = Number(process.env.MINIO_PORT) || 9000;
+if (!process.env.MINIO_PORT) {
+  console.warn(
+    "Environment Variables doesnot contain: MINIO_PORT\n\tUsing default: 9000"
+  );
+  // _absent_envs.push("MINIO_PORT");
+}
+
+const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY || "";
+if (!process.env.MINIO_ACCESS_KEY) {
+  console.warn("Environment Variables doesnot contain: MINIO_ACCESS_KEY");
+  // _absent_envs.push("MINIO_ACCESS_KEY");
+}
+
+const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY || "";
+if (!process.env.MINIO_SECRET_KEY) {
+  console.warn("Environment Variables doesnot contain: MINIO_SECRET_KEY");
+  // _absent_envs.push("MINIO_SECRET_KEY");
+}
+
+const MINIO_BUCKET_NAME = process.env.MINIO_BUCKET_NAME || "";
+if (!process.env.MINIO_SECRET_KEY) {
+  console.warn("Environment Variables doesnot contain: MINIO_BUCKET_NAME");
+  // _absent_envs.push("MINIO_BUCKET_NAME");
+}
+
+const MINIO_REGION = process.env.MINIO_REGION || "";
+if (!process.env.MINIO_REGION) {
+  console.warn("Environment Variables doesnot contain: MINIO_REGION");
+  // _absent_envs.push("MINIO_REGION");
+}
+
 export {
   APP_NAME,
-  NEXTAUTH_URL,
-  NODE_ENV,
-  DATABASE_URL,
-  AZURE_OPENAI_API_KEY,
-  AZURE_OPENAI_API_VERSION,
-  AZURE_OPENAI_ENDPOINT,
-  AZURE_OPENAI_DEPLOYMENT_NAME,
-  NEXTAUTH_SECRET,
-  AUTH_GOOGLE_ID,
-  AUTH_GOOGLE_SECRET,
-  AUTH_GITHUB_ID,
-  AUTH_GITHUB_SECRET,
   AUTH_AZURE_AD_ID,
   AUTH_AZURE_AD_SECRET,
-  DEFAULT_LOGIN_ROUTE,
-  DEFAULT_REGISTER_ROUTE,
-  DEFAULT_PASSKEY_REGISTER_ROUTE,
+  AUTH_GITHUB_ID,
+  AUTH_GITHUB_SECRET,
+  AUTH_GOOGLE_ID,
+  AUTH_GOOGLE_SECRET,
+  AZURE_OPENAI_API_KEY,
+  AZURE_OPENAI_API_VERSION,
+  AZURE_OPENAI_DEPLOYMENT_NAME,
+  AZURE_OPENAI_ENDPOINT,
+  DATABASE_URL,
   DEFAULT_LOGGED_IN_ROUTE,
+  DEFAULT_LOGIN_ROUTE,
+  DEFAULT_PASSKEY_REGISTER_ROUTE,
+  DEFAULT_PREPROCESS_ROUTE,
+  DEFAULT_REGISTER_ROUTE,
+  MINIO_ACCESS_KEY,
+  MINIO_BUCKET_NAME,
+  MINIO_ENDPOINT,
+  MINIO_PORT,
+  MINIO_REGION,
+  MINIO_SECRET_KEY,
+  NEXTAUTH_SECRET,
+  NEXTAUTH_URL,
+  NODE_ENV,
 };

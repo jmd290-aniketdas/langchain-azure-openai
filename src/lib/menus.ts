@@ -4,6 +4,7 @@ import {
 } from "@/types/menus.types";
 import {
   Folder,
+  FolderCog,
   KeyRound,
   LifeBuoy,
   MessageCircle,
@@ -29,9 +30,9 @@ export const mainSidebarMenuContent: MainSidebarMenuContent[] = [
     name: "Folders",
     tooltip: "Folders",
     action: {
-        icon: Plus,
-        tag: "New Folder",
-        link: "/folders/create",
+        icon: FolderCog,
+        tag: "Manage Folders",
+        link: "/folders/manage",
     },
   },
   {

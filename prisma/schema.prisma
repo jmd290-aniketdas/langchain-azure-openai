@@ -9,24 +9,43 @@ generator client {
 }
 
 model User {
-    id            String          @id @default(cuid())
-    name          String?
-    email         String          @unique
-    emailVerified DateTime?
-    passwordHash  String?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    // Optional for WebAuthn support
-    Authenticator Authenticator[]
-
-    // Fields for TOTP-based 2FA support:
-    twoFactorEnabled Boolean @default(false)
+    id               String          @id @default(cuid())
+    name             String?
+    email            String          @unique
+    emailVerified    DateTime?
+    passwordHash     String?
+    image            String?
+    twoFactorEnabled Boolean         @default(false)
     twoFactorSecret  String?
-    backupCodes      String? // (optional) to store backup codes for recovery
+    backupCodes      String?
+    accounts         Account[]
+    sessions         Session[]
+    authenticator    Authenticator[]
+    bucket           Bucket?
+    createdAt        DateTime        @default(now())
+    updatedAt        DateTime        @updatedAt
+}
 
+model Bucket {
+    id        String   @id @default(cuid())
+    userId    String   @unique
+    folders   Folder[]
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
+
+model Folder {
+    id             String   @id @default(cuid())
+    name           String
+    files          String[] @default([])
+    parentFolderId String
+    bucketId       String
+    parentFolder   Folder?  @relation("RecursiveFolder", fields: [parentFolderId], references: [id], onDelete: Cascade)
+    subFolders     Folder[] @relation("RecursiveFolder")
+    bucket         Bucket   @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 }
 
 model Account {
@@ -41,11 +60,9 @@ model Account {
     scope             String?
     id_token          String?
     session_state     String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
 
     @@id([provider, providerAccountId])
 }
@@ -55,9 +72,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 }
 
 // Optional for WebAuthn support
@@ -70,8 +86,7 @@ model Authenticator {
     credentialDeviceType String
     credentialBackedUp   Boolean
     transports           String?
-
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@id([userId, credentialID])
 }

@@ -1,12 +1,20 @@
 "use client";
 
-import { credentialsRegister, credentialsSignIn } from "@/actions/auth.server.actions";
+import {
+  credentialsRegister,
+  credentialsSignIn,
+} from "@/actions/auth.server.actions";
+import {
+  DEFAULT_PASSKEY_REGISTER_ROUTE,
+  DEFAULT_PREPROCESS_ROUTE,
+} from "@/lib/environment-variables";
 import { cn } from "@/lib/utils";
 import {
   registerSchema,
   RegisterSchema,
 } from "@/lib/validators/register-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { Fingerprint, Loader2, Power, PowerOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,8 +24,6 @@ import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { Toggle } from "../../../../components/ui/toggle";
-import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
-import { DEFAULT_LOGGED_IN_ROUTE, DEFAULT_PASSKEY_REGISTER_ROUTE } from "@/lib/environment-variables";
 
 export default function RegisterForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -47,7 +53,7 @@ export default function RegisterForm({ className }: { className?: string }) {
       if (isRegisterPasskeyEnabled) {
         router.push(DEFAULT_PASSKEY_REGISTER_ROUTE);
       } else {
-        router.push(DEFAULT_LOGGED_IN_ROUTE);
+        router.push(DEFAULT_PREPROCESS_ROUTE);
       }
     } catch (error) {
       const e = error as Error;

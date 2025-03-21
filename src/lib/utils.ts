@@ -1,5 +1,12 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  excelExtensions,
+  fileExtensionsCategories,
+  imageExtensions,
+  pdfExtensions,
+  wordExtensions,
+} from "./consts";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -83,4 +90,65 @@ export async function copyToClipboard(textToCopy: string) {
   } catch (error) {
     throw error;
   }
+}
+
+export function groupFileTypesToChart(files: string[]): {
+  chartConfig: { [key: string]: { label: string; color: string } };
+  chartData: { [key: string]: number }[];
+} {
+  // Build extension-to-category lookup
+  const extToCategory: Record<string, string> = {};
+  for (const cat of fileExtensionsCategories) {
+    for (const ext of cat.extensions) {
+      extToCategory[ext] = cat.category;
+    }
+  }
+
+  // Prepare an array with all known categories (from fileExtensionsCategories) plus "Others"
+  const allCategories = fileExtensionsCategories.map((cat) => cat.category);
+  allCategories.push("Others");
+
+  // Initialize groups for each category
+  const groups: {
+    [key: string]: { category: string; files: string[]; count: number };
+  } = {};
+  for (const category of allCategories) {
+    groups[category] = { category, files: [], count: 0 };
+  }
+
+  // Process each file once
+  for (const file of files) {
+    const fileName = file.split("/").pop();
+    const ext = fileName?.split(".").pop()?.toLowerCase();
+    // Determine category using the extension lookup; default to "Others"
+    const category = ext && extToCategory[ext] ? extToCategory[ext] : "Others";
+    groups[category].files.push(file);
+    groups[category].count++;
+  }
+
+  // Create chartData: an array with a single object mapping category names to their counts
+  const chartDataObject: { [key: string]: number } = {};
+  for (const category of allCategories) {
+    chartDataObject[category] = groups[category].count;
+  }
+  const chartData = [chartDataObject];
+
+  // Create chartConfig: an object mapping category names to {label, color} pairs.
+  // Colors are assigned sequentially using CSS variables: var(--chart-1), var(--chart-2), etc.
+  const chartConfig: { [key: string]: { label: string; color: string } } = {};
+  allCategories.forEach((category, index) => {
+    chartConfig[category] = {
+      label: category,
+      color: `var(--chart-${index + 1})`,
+    };
+  });
+
+  return { chartConfig, chartData };
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 import { redirect } from "next/navigation";
 
-export default async function Query() {
+export default async function Chat() {
   const session = await auth();
   if (!session) redirect(DEFAULT_LOGIN_ROUTE);
 

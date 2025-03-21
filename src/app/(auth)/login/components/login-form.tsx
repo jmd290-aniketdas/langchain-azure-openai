@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  credentialSignInWithMFA,
-  credentialsSignIn,
-  integratedSignIn,
-} from "@/actions/auth.server.actions";
+import { integratedSignIn } from "@/actions/auth.server.actions";
 import { is2FAEnabled } from "@/actions/users.actions";
-import { DEFAULT_LOGGED_IN_ROUTE } from "@/lib/environment-variables";
+import { DEFAULT_PREPROCESS_ROUTE } from "@/lib/environment-variables";
 import { cn } from "@/lib/utils";
 import { signInSchema, SignInSchema } from "@/lib/validators/signin-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,7 +85,7 @@ export default function LoginForm({ className }: { className?: string }) {
       }
 
       toast.success("Successfully Signed In with Credentials");
-      router.push(DEFAULT_LOGGED_IN_ROUTE);
+      router.push(DEFAULT_PREPROCESS_ROUTE);
     } catch (error) {
       const e = error as Error;
       if (e.message !== "NEXT_REDIRECT") {
