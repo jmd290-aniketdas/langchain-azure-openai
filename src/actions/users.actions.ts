@@ -172,11 +172,9 @@ const fetchUserBucketName = async (email: string) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { bucket: true },
     });
     if (!user) throw new Error("User not found");
-    if (!user.bucket) throw new Error("User bucket does not exist");
-    return user.bucket.id;
+    return user.bucketName;
   } catch (error) {
     throw error;
   }

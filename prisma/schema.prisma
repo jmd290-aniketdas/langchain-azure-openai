@@ -18,34 +18,12 @@ model User {
     twoFactorEnabled Boolean         @default(false)
     twoFactorSecret  String?
     backupCodes      String?
+    bucketName       String          @unique @default(cuid())
     accounts         Account[]
     sessions         Session[]
     authenticator    Authenticator[]
-    bucket           Bucket?
     createdAt        DateTime        @default(now())
     updatedAt        DateTime        @updatedAt
-}
-
-model Bucket {
-    id        String   @id @default(cuid())
-    userId    String   @unique
-    folders   Folder[]
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-model Folder {
-    id             String   @id @default(cuid())
-    name           String
-    files          String[] @default([])
-    parentFolderId String
-    bucketId       String
-    parentFolder   Folder?  @relation("RecursiveFolder", fields: [parentFolderId], references: [id], onDelete: Cascade)
-    subFolders     Folder[] @relation("RecursiveFolder")
-    bucket         Bucket   @relation(fields: [bucketId], references: [id], onDelete: Cascade)
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
 }
 
 model Account {

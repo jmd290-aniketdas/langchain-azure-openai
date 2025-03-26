@@ -13,6 +13,14 @@ import {
   Settings,
   User2,
 } from "lucide-react";
+import {
+  ACCOUNT_SETTINGS_ROOT_LINK,
+  APPEARENCE_AND_THEME_ROOT_LINK,
+  CHATS_ROOT_LINK,
+  FOLDERS_MANAGE_ROOT_LINK,
+  PRIVACY_AND_SECURITY_ROOT_LINK,
+  SUPPORT_AND_HELP_ROOT_LINK,
+} from "./consts";
 
 export const mainSidebarMenuContent: MainSidebarMenuContent[] = [
   {
@@ -20,9 +28,9 @@ export const mainSidebarMenuContent: MainSidebarMenuContent[] = [
     name: "Chats",
     tooltip: "Chats",
     action: {
-        icon: Plus,
-        tag: "New Chat",
-        link: "/chats",
+      icon: Plus,
+      tag: "New Chat",
+      link: CHATS_ROOT_LINK,
     },
   },
   {
@@ -30,9 +38,9 @@ export const mainSidebarMenuContent: MainSidebarMenuContent[] = [
     name: "Folders",
     tooltip: "Folders",
     action: {
-        icon: FolderCog,
-        tag: "Manage Folders",
-        link: "/folders/manage",
+      icon: FolderCog,
+      tag: "Manage Folders",
+      link: FOLDERS_MANAGE_ROOT_LINK,
     },
   },
   {
@@ -46,25 +54,25 @@ export const settingsSidebarMenuContent: SubSidebarMenuContent[] = [
   {
     name: "Account Settings",
     icon: User2,
-    link: "/settings/account_settings",
+    link: ACCOUNT_SETTINGS_ROOT_LINK,
     searchTerms: [],
   },
   {
     name: "Privacy & Security",
     icon: KeyRound,
-    link: "/settings/privacy_amp_security",
+    link: PRIVACY_AND_SECURITY_ROOT_LINK,
     searchTerms: [],
   },
   {
     name: "Appearance & Theme",
     icon: Paintbrush,
-    link: "/settings/appearance_amp_theme",
+    link: APPEARENCE_AND_THEME_ROOT_LINK,
     searchTerms: [],
   },
   {
     name: "Support & Help",
     icon: LifeBuoy,
-    link: "/settings/support_amp_help",
+    link: SUPPORT_AND_HELP_ROOT_LINK,
     searchTerms: [],
   },
 ];

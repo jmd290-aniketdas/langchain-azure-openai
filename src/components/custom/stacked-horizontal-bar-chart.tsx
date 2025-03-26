@@ -52,7 +52,7 @@ export function StackedHorizontalBarChart({
 
         {legend && (
           <ChartLegend
-            className="pt-1 justify-end text-xs gap-8"
+            className="pt-1 justify-end text-xs gap-8 hidden md:flex"
             content={<ChartLegendContent />}
           />
         )}
