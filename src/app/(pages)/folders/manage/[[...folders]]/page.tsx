@@ -1,15 +1,15 @@
+import {
+  listUserCurrentFilesAndFolders,
+  listUserFilesAndFoldersInBucket,
+} from "@/actions/files.actions";
 import { auth } from "@/auth";
 import { DEFAULT_LOGIN_ROUTE } from "@/lib/environment-variables";
 import { redirect } from "next/navigation";
 import CreateFolder from "./components/create-folder";
 import FolderBreadcrumb from "./components/folder-breadcrumb";
-import UploadFile from "./components/upload-file";
-import {
-  listUserCurrentFilesAndFolders,
-  listUserFilesAndFoldersInBucket,
-} from "@/actions/files.actions";
-import ListFolders from "./components/list-folders";
 import ListFiles from "./components/list-files";
+import ListFolders from "./components/list-folders";
+import UploadFile from "./components/upload-file";
 
 export default async function Folders({
   params,
@@ -47,7 +47,7 @@ export default async function Folders({
           />
         </span>
       </section>
-      <ListFolders folders={currentFolders} />
+      <ListFolders folders={currentFolders} email={session.user.email} />
       <ListFiles files={currentFiles} email={session.user.email} />
     </div>
   );
