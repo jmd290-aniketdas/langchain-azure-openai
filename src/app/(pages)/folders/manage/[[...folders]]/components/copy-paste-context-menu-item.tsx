@@ -2,6 +2,7 @@
 
 import { pasteFilesOrFoldersForUser } from "@/actions/files.actions";
 import { ContextMenuItem } from "@/components/ui/context-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { copyToClipboard } from "@/lib/utils";
 import { MinIOFile, MinIOFolder } from "@/types/files.types";
@@ -58,5 +59,57 @@ export function PasteContextMenuItem({
       <ClipboardPaste />
       Paste
     </ContextMenuItem>
+  );
+}
+
+export function CopyDropdownMenuItem({
+  info,
+}: {
+  info: MinIOFile | MinIOFolder;
+}) {
+  const [_, setCopiedValue] = useLocalStorage<string>("copied-value", "");
+  const onCopy = () => {
+    setCopiedValue(info.name);
+    copyToClipboard(info.name).then(() =>
+      toast.success(
+        <span>
+          Copied to clipboard
+          <br />
+          <code>{info.name}</code>
+        </span>
+      )
+    );
+  };
+  return (
+    <DropdownMenuItem onSelect={() => onCopy()}>
+      <ClipboardCopy />
+      Copy
+    </DropdownMenuItem>
+  );
+}
+
+export function PasteDropdownMenuItem({
+  email,
+  info,
+}: {
+  email: string;
+  info: MinIOFile | MinIOFolder;
+}) {
+  const router = useRouter();
+  const [copiedValue, _] = useLocalStorage<string>("copied-value", "");
+  const _pasteItem = async () => {
+    pasteFilesOrFoldersForUser(email, copiedValue, info.name)
+      .then(() => toast.success("Successfully copied to destination"))
+      .catch((error) => {
+        console.error(error);
+        toast.error(error.message);
+      })
+      .finally(() => router.refresh());
+  };
+  return (
+    <DropdownMenuItem disabled={!copiedValue} onSelect={() => _pasteItem()}>
+      <ClipboardPaste />
+      Paste
+    </DropdownMenuItem>
   );
 }

@@ -28,6 +28,7 @@ import { FOLDERS_MANAGE_ROOT_LINK } from "@/lib/consts";
 import { formatFileSize } from "@/lib/utils";
 import { MinIOFolder } from "@/types/files.types";
 import {
+  EllipsisVertical,
   Folder,
   FolderPen,
   Loader2,
@@ -39,10 +40,24 @@ import Link from "next/link";
 import { Suspense } from "react";
 import {
   CopyContextMenuItem,
+  CopyDropdownMenuItem,
   PasteContextMenuItem,
+  PasteDropdownMenuItem,
 } from "./copy-paste-context-menu-item";
 import { DeleteFolderDialogContent } from "./delete-dialog-content";
 import { RenameFolderDialogContent } from "./rename-dialog-content";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuDialog,
+  DropdownMenuDialogContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuItemDialogTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default async function ListFolders({
   folders,
@@ -57,10 +72,10 @@ export default async function ListFolders({
         <p className="text-xl font-light text-muted-foreground">Folders</p>
         <hr />
       </section>
-      <div className="grid gap-x-4 gap-y-2 grid-cols-[2rem_3fr_1fr] w-full">
-        <section className="grid grid-cols-subgrid col-span-full text-xs text-muted-foreground border-b">
+      <div className="grid gap-x-4 grid-cols-[2rem_3fr_1fr_3rem] w-full">
+        <section className="grid grid-cols-subgrid col-span-full text-xs text-muted-foreground border-b px-3">
           <p className="col-start-2 text-start">Name</p>
-          <p className="col-start-3 text-end pr-2">Last Modified</p>
+          <p className="col-start-3 text-end">Last Modified</p>
         </section>
         {folders.length <= 0 && (
           <span className="text-sm font-light text-muted-foreground text-center w-full col-span-full">
@@ -86,35 +101,44 @@ function FolderDisplay({
   const folderName = folders[folders.length - 1];
   const route = FOLDERS_MANAGE_ROOT_LINK + "/" + folderInfo.name;
   return (
-    <ContextMenu>
-      <Tooltip>
-        <ContextMenuTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              className="grid grid-cols-subgrid col-span-full p-0"
-            >
+    <section className="grid grid-cols-subgrid col-span-full items-center text-sm font-medium transition-colors border-b rounded hover:bg-accent/60 hover:text-accent-foreground px-3">
+      <ContextMenu>
+        <Tooltip>
+          <ContextMenuTrigger asChild>
+            <TooltipTrigger asChild>
               <Link
                 href={route}
-                className="grid grid-cols-subgrid col-span-full items-center px-3 py-2"
+                className="grid grid-cols-subgrid col-span-3 items-center h-9"
               >
-                <Folder />
-                <p className="text-start">{folderName}</p>
+                <Folder className="size-4" />
+                <p className="text-start truncate">{folderName}</p>
                 <p className="text-end">
                   {folderInfo.lastModified.toDateString()}
                 </p>
               </Link>
-            </Button>
-          </TooltipTrigger>
-        </ContextMenuTrigger>
-        <FolderTooltipContent folderInfo={folderInfo} />
-      </Tooltip>
-      <FolderContextMenuContent
-        folderInfo={folderInfo}
-        route={route}
-        email={email}
-      />
-    </ContextMenu>
+            </TooltipTrigger>
+          </ContextMenuTrigger>
+          <FolderTooltipContent folderInfo={folderInfo} />
+        </Tooltip>
+        <FolderContextMenuContent
+          folderInfo={folderInfo}
+          route={route}
+          email={email}
+        />
+      </ContextMenu>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="size-7 justify-self-center">
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <FolderDropdownMenuContent
+          folderInfo={folderInfo}
+          route={route}
+          email={email}
+        />
+      </DropdownMenu>
+    </section>
   );
 }
 
@@ -147,6 +171,7 @@ function FolderContextMenuContent({
   return (
     <ContextMenuContent className="w-64">
       <ContextMenuLabel>Options</ContextMenuLabel>
+      <ContextMenuSeparator />
 
       <ContextMenuGroup>
         <a href={route} target="_blank">
@@ -165,7 +190,9 @@ function FolderContextMenuContent({
             <FolderPen />
             Rename
           </ContextMenuItemDialogTrigger>
-          <RenameFolderDialogContent folderInfo={folderInfo} email={email} />
+          <ContextMenuDialogContent>
+            <RenameFolderDialogContent folderInfo={folderInfo} email={email} />
+          </ContextMenuDialogContent>
         </ContextMenuDialog>
 
         <CopyContextMenuItem info={folderInfo} />
@@ -202,10 +229,90 @@ function FolderContextMenuContent({
             <Trash2 />
             Delete
           </ContextMenuItemDialogTrigger>
-          <DeleteFolderDialogContent folderInfo={folderInfo} email={email} />
+          <ContextMenuDialogContent>
+            <DeleteFolderDialogContent folderInfo={folderInfo} email={email} />
+          </ContextMenuDialogContent>
         </ContextMenuDialog>
       </ContextMenuGroup>
     </ContextMenuContent>
+  );
+}
+
+function FolderDropdownMenuContent({
+  folderInfo,
+  route,
+  email,
+}: {
+  folderInfo: MinIOFolder;
+  route: string;
+  email: string;
+}) {
+  return (
+    <DropdownMenuContent className="w-64">
+      <DropdownMenuLabel>Options</DropdownMenuLabel>
+
+      <DropdownMenuGroup>
+        <a href={route} target="_blank">
+          <DropdownMenuItem>
+            <PanelTop />
+            Open in a new tab
+          </DropdownMenuItem>
+        </a>
+      </DropdownMenuGroup>
+
+      <DropdownMenuSeparator />
+
+      <DropdownMenuGroup>
+        <DropdownMenuDialog>
+          <DropdownMenuItemDialogTrigger>
+            <FolderPen />
+            Rename
+          </DropdownMenuItemDialogTrigger>
+          <DropdownMenuDialogContent>
+            <RenameFolderDialogContent folderInfo={folderInfo} email={email} />
+          </DropdownMenuDialogContent>
+        </DropdownMenuDialog>
+
+        <CopyDropdownMenuItem info={folderInfo} />
+
+        <PasteDropdownMenuItem info={folderInfo} email={email} />
+      </DropdownMenuGroup>
+
+      <DropdownMenuSeparator />
+
+      <DropdownMenuGroup>
+        <DropdownMenuDialog>
+          <DropdownMenuItemDialogTrigger>
+            <Settings2 />
+            Properties
+          </DropdownMenuItemDialogTrigger>
+
+          <DropdownMenuDialogContent>
+            <DialogHeader>
+              <DialogTitle>Properties</DialogTitle>
+              <DialogDescription>File Details listed</DialogDescription>
+            </DialogHeader>
+            <Suspense fallback={<Loader2 className="animate-spin" />}>
+              <PropertiesDialogContent folderInfo={folderInfo} email={email} />
+            </Suspense>
+          </DropdownMenuDialogContent>
+        </DropdownMenuDialog>
+      </DropdownMenuGroup>
+
+      <DropdownMenuSeparator />
+
+      <DropdownMenuGroup>
+        <DropdownMenuDialog>
+          <DropdownMenuItemDialogTrigger variant="destructive">
+            <Trash2 />
+            Delete
+          </DropdownMenuItemDialogTrigger>
+          <DropdownMenuDialogContent>
+            <DeleteFolderDialogContent folderInfo={folderInfo} email={email} />
+          </DropdownMenuDialogContent>
+        </DropdownMenuDialog>
+      </DropdownMenuGroup>
+    </DropdownMenuContent>
   );
 }
 

@@ -6,7 +6,6 @@ import {
 } from "@/actions/files.actions";
 import { fetchUserBucketName } from "@/actions/users.actions";
 import { Button } from "@/components/ui/button";
-import { ContextMenuDialogContent } from "@/components/ui/context-menu";
 import {
   DialogClose,
   DialogDescription,
@@ -84,7 +83,7 @@ export function DeleteFolderDialogContent({
       });
   };
   return (
-    <ContextMenuDialogContent>
+    <>
       <DialogHeader>
         <DialogTitle>Delete Folder</DialogTitle>
         <DialogDescription>
@@ -134,7 +133,9 @@ export function DeleteFolderDialogContent({
         {!loading && folders.length !== 0 && (
           <ol className="list-decimal list-inside">
             {folders.map((folder, i) => (
-              <li className="text-sm" key={i}>{folder.name}</li>
+              <li className="text-sm" key={i}>
+                {folder.name}
+              </li>
             ))}
           </ol>
         )}
@@ -150,7 +151,7 @@ export function DeleteFolderDialogContent({
           </Button>
         </DialogClose>
       </DialogFooter>
-    </ContextMenuDialogContent>
+    </>
   );
 }
 
@@ -191,7 +192,7 @@ export function DeleteFileDialogContent({
       });
   };
   return (
-    <ContextMenuDialogContent>
+    <>
       <DialogHeader>
         <DialogTitle>Delete File</DialogTitle>
         <DialogDescription>
@@ -224,6 +225,6 @@ export function DeleteFileDialogContent({
           </Button>
         </DialogClose>
       </DialogFooter>
-    </ContextMenuDialogContent>
+    </>
   );
 }

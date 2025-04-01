@@ -8,7 +8,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ContextMenuDialogContent } from "@/components/ui/context-menu";
 import {
   DialogClose,
   DialogDescription,
@@ -66,7 +65,7 @@ export function RenameFolderDialogContent({
     }
   };
   return (
-    <ContextMenuDialogContent>
+    <>
       <DialogHeader>
         <DialogTitle>Rename Folder</DialogTitle>
         <DialogDescription>Rename folder name here.</DialogDescription>
@@ -92,7 +91,7 @@ export function RenameFolderDialogContent({
           </Button>
         </DialogClose>
       </DialogFooter>
-    </ContextMenuDialogContent>
+    </>
   );
 }
 
@@ -148,7 +147,7 @@ export function RenameFileDialogContent({
     }
   };
   return (
-    <ContextMenuDialogContent>
+    <>
       <DialogHeader>
         <DialogTitle>Rename File</DialogTitle>
         <DialogDescription>Rename File name here.</DialogDescription>
@@ -199,6 +198,6 @@ export function RenameFileDialogContent({
           </Button>
         </DialogClose>
       </DialogFooter>
-    </ContextMenuDialogContent>
+    </>
   );
 }
