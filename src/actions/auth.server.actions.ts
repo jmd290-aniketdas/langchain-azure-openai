@@ -5,7 +5,7 @@ import {
   APP_NAME,
   DEFAULT_LOGIN_ROUTE,
   DEFAULT_PREPROCESS_ROUTE,
-  NEXTAUTH_URL
+  NEXTAUTH_URL,
 } from "@/lib/environment-variables";
 import { prisma } from "@/lib/prisma";
 import { generateBackupCode } from "@/lib/utils";
@@ -105,10 +105,21 @@ const credentialsRegister = async (data: RegisterSchema) => {
         passwordHash,
       },
     });
-
     if (!newUser) throw new Error("User not created");
+    const newAccount = await prisma.account.create({
+      data: {
+        userId: newUser.id,
+        type: "credentials",
+        provider: "credentials",
+        providerAccountId: newUser.id,
+      },
+    });
+    if (!newAccount) {
+      await prisma.user.delete({ where: { id: newUser.id } });
+      throw new Error("Account not created");
+    }
 
-    return newUser;
+    return [newUser, newAccount];
   } catch (error) {
     throw error;
   }
@@ -399,6 +410,5 @@ export {
   saveWebAuthNRegistrationResponse,
   userSignOut,
   verifyWebAuthNAuthenticationResponse,
-  verifyWebAuthNRegistrationResponse
+  verifyWebAuthNRegistrationResponse,
 };
-

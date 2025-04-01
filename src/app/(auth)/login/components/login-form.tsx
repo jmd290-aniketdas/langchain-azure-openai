@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MultiFactorAuthDialog } from "./multi-factor-auth-dialog";
 
 export default function LoginForm({ className }: { className?: string }) {
@@ -79,7 +79,7 @@ export default function LoginForm({ className }: { className?: string }) {
         });
       } else {
         await integratedSignIn({
-          provider: "credentialsMFA",
+          provider: "credentials",
           credentialsData: data,
         });
       }
