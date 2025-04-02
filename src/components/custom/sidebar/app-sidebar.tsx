@@ -43,7 +43,7 @@ export function AppSidebar({
     <Sidebar
       collapsible="icon"
       className={cn(
-        "overflow-hidden [&>[data-sidebar=sidebar]]:flex-row z-50 backdrop-blur-md",
+        "overflow-hidden [&>[data-sidebar=sidebar]]:flex-row z-50 bg-transparent",
         className
       )}
       {...props}

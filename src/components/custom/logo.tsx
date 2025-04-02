@@ -1,12 +1,7 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { BrainCircuit } from "lucide-react";
-import { useTheme } from "next-themes";
-import GradientIcon from "./gradient-icon";
 
 const Logo = ({ className }: { className?: string }) => {
-  const { theme } = useTheme();
   return (
     <div
       className={cn(
@@ -14,7 +9,7 @@ const Logo = ({ className }: { className?: string }) => {
         className
       )}
     >
-      <GradientIcon icon={BrainCircuit} strokeWidth={2} />
+      <BrainCircuit className="stroke-primary-foreground" />
     </div>
   );
 };

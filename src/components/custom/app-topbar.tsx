@@ -10,7 +10,7 @@ export function AppTopbar({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 flex shrink-0 items-center justify-between gap-2 border-b backdrop-blur-md p-4 h-(--header-height) z-50",
+        "sticky top-0 flex shrink-0 items-center justify-between gap-2 border-b bg-sidebar/40 backdrop-blur-xl p-4 h-(--header-height) z-50",
         className
       )}
     >
