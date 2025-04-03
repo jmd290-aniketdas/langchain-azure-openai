@@ -29,11 +29,11 @@ const pathnameMap = [
 export function MainMenus({
   session,
   activeMenu,
-  setActiveMenu,
+  setActiveMenuAction,
 }: {
   session: Session | null;
   activeMenu?: MainSidebarMenuContent;
-  setActiveMenu: React.Dispatch<
+  setActiveMenuAction: React.Dispatch<
     React.SetStateAction<MainSidebarMenuContent | undefined>
   >;
 }) {
@@ -53,7 +53,7 @@ export function MainMenus({
         const activeMenuObj = res.find(
           (r) => r.name === activeMenu?.activeMenu
         );
-        setActiveMenu(activeMenuObj);
+        setActiveMenuAction(activeMenuObj);
       })
       .catch((err) => toast.error(err.message));
   }, []);
@@ -81,7 +81,7 @@ export function MainMenus({
                       tooltip={tooltip}
                       showTooltip
                       isActive={name === activeMenu?.name}
-                      onClick={() => setActiveMenu(menu)}
+                      onClick={() => setActiveMenuAction(menu)}
                     >
                       <Icon />
                       <p className="sr-only">{name}</p>
@@ -93,14 +93,6 @@ export function MainMenus({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <Avatar>
-          <AvatarImage src={session?.user?.image ?? undefined} />
-          <AvatarFallback>
-            {getAbbreviatedName(session?.user?.name ?? undefined)}
-          </AvatarFallback>
-        </Avatar>
-      </SidebarFooter>
     </>
   );
 }
