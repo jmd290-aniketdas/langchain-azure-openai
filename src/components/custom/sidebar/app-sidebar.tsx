@@ -106,7 +106,6 @@ export function AppSidebar({
           className="w-(--sidebar-width-icon) border-r group-data-[state=collapsed]:w-0 overflow-hidden transition-all"
         >
           <MainMenus
-            session={session}
             activeMenu={activeMenu}
             setActiveMenuAction={setActiveMenu}
           />

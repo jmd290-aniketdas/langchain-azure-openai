@@ -27,11 +27,9 @@ const pathnameMap = [
 ];
 
 export function MainMenus({
-  session,
   activeMenu,
   setActiveMenuAction,
 }: {
-  session: Session | null;
   activeMenu?: MainSidebarMenuContent;
   setActiveMenuAction: React.Dispatch<
     React.SetStateAction<MainSidebarMenuContent | undefined>
