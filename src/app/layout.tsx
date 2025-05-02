@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import ProvidersWrapper from "@/components/providers/provider-wrapper";
+import ProvidersWrapper from "@/providers/provider-wrapper";
 
 const poppins = Poppins({
   variable: "--font-poppins",

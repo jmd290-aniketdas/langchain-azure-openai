@@ -1,3 +1,5 @@
+import { AzureChatOpenAI } from "@langchain/openai";
+
 type GPTModelCatalog = {
   name: string;
   formalName: string;
@@ -7,4 +9,9 @@ type GPTModelCatalog = {
   available: boolean;
 };
 
-export { type GPTModelCatalog };
+type GPTModelCatalogMap = {
+  name: string;
+  model?: AzureChatOpenAI;
+}
+
+export { type GPTModelCatalog, type GPTModelCatalogMap };

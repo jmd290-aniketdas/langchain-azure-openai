@@ -17,6 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import ScratchPad from "../scratchpad";
 
 export function SubMenusContent({
   activeMenu,
@@ -44,7 +45,7 @@ export function SubMenusContent({
   const ActionIcon = activeMenu.action?.icon;
 
   return (
-    <SidebarContent className="py-3">
+    <SidebarContent className="pt-3">
       {activeMenu.action && (
         <>
           <section className="px-2">
@@ -64,7 +65,7 @@ export function SubMenusContent({
           className="transition-all group-data-[state=collapsed]:h-0 group-data-[state=collapsed]:opacity-0"
         />
       </section>
-      <SidebarGroup>
+      <SidebarGroup className="flex-1">
         <SidebarGroupContent className="flex flex-col gap-1">
           {sidebarMenuContent.map((menu, i) => {
             const { icon: Icon, name, link } = menu;
@@ -85,6 +86,16 @@ export function SubMenusContent({
           })}
         </SidebarGroupContent>
       </SidebarGroup>
+
+      <Separator className="group-data-[state=collapsed]:hidden" />
+
+      <SidebarGroup className="group-data-[state=collapsed]:hidden">
+        <SidebarGroupContent>
+          <ScratchPad />
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <Separator />
     </SidebarContent>
   );
 }

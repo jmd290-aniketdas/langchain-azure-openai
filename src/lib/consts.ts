@@ -1,4 +1,5 @@
 import { GPTModelCatalog } from "@/types/models.types";
+import { StoredMessage } from "@langchain/core/messages";
 
 export const CHATS_ROOT_LINK = "/chats";
 export const FOLDERS_MANAGE_ROOT_LINK = "/folders/manage";
@@ -74,7 +75,7 @@ export const GPT_MODELS_AVAILABLE: GPTModelCatalog[] = [
       "GPT-4o Mini is a smaller, cost-effective version of GPT-4o, supporting text and vision inputs with a context window of 128K tokens.",
     footer: "Faster for most questions",
     date: "2024-07-18",
-    available: true,
+    available: false,
   },
   {
     name: "gpt-4",
@@ -86,3 +87,13 @@ export const GPT_MODELS_AVAILABLE: GPTModelCatalog[] = [
     available: false,
   },
 ];
+
+export const EMPTY_STORED_MESSAGE: StoredMessage = {
+  type: "",
+  data: {
+    content: "",
+    role: undefined,
+    name: undefined,
+    tool_call_id: undefined,
+  },
+};

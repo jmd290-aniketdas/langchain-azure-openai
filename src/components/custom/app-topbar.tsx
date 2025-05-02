@@ -1,12 +1,10 @@
 "use client";
 
-import { fetchAvailableGPTModels } from "@/actions/models.actions";
-import useLocalStorage from "@/hooks/use-local-storage";
+import { useChatContext } from "@/contexts/chat-context";
+import { useModelsContext } from "@/contexts/models-context";
 import { cn } from "@/lib/utils";
 import { GPTModelCatalog } from "@/types/models.types";
 import { Calendar, Stars } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   HoverCard,
   HoverCardContent,
@@ -24,18 +22,13 @@ import { Skeleton } from "../ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function AppTopbar({ className }: { className?: string }) {
-  const [selectedModel, setSelectedModel, selectedModelLoading] =
-    useLocalStorage("model", "");
-  const [availableModels, setAvailableModels] = useState<GPTModelCatalog[]>([]);
-
-  useEffect(() => {
-    fetchAvailableGPTModels()
-      .then((res) => setAvailableModels(res))
-      .catch((e) => {
-        console.error(e);
-        toast.error(e.message);
-      });
-  }, []);
+  const {
+    availableModels,
+    selectedModel,
+    setSelectedModel,
+    selectedModelLoading,
+  } = useModelsContext();
+  const { chatTitle } = useChatContext();
 
   return (
     <header
@@ -44,14 +37,22 @@ export function AppTopbar({ className }: { className?: string }) {
         className
       )}
     >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SidebarTrigger />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Toggle Sidebar</p>
-        </TooltipContent>
-      </Tooltip>
+      <section className="flex gap-4 items-center h-full">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Toggle Sidebar</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <hr className="w-px h-full bg-muted-foreground" />
+
+        <p className="text-sm text-muted-foreground whitespace-nowrap truncate">
+          {chatTitle ? chatTitle : "New Chat"}
+        </p>
+      </section>
 
       {selectedModelLoading ? (
         <Skeleton className="h-9 w-42" />

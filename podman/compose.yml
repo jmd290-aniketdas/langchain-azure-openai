@@ -1,10 +1,10 @@
 services:
-  postgres:
-    container_name: postgres_container
-    image: postgres:latest
+  pgvector:
+    container_name: pgvector
+    image: pgvector/pgvector:pg16
     command: '-d 1'
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - ai_app:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     environment:
@@ -12,35 +12,34 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=main
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d main" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
   neon-proxy:
-    container_name: neon_proxy_container
+    container_name: neon_proxy
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
     environment:
-      - PG_CONNECTION_STRING=postgres://postgres:postgres@postgres:5432/main
+      - PG_CONNECTION_STRING=postgresql://postgres:postgres@pgvector:5432/main
     ports:
       - "4444:4444"
     depends_on:
-      postgres:
+      pgvector:
         condition: service_healthy
 
   minio:
-    container_name: minio_container
+    container_name: minio
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ~/minio/data:/data
+      - ai_app:/var/lib/minio/data
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: admin1234
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=admin1234
 
 volumes:
-  db_data:
-  ~/minio/data:
+  ai_app:
