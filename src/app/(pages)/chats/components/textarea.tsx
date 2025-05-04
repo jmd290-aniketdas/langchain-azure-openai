@@ -1,19 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatContext } from "@/contexts/chat-context";
 import { useFilesContext } from "@/contexts/files-context";
 import { cn } from "@/lib/utils";
@@ -22,20 +12,10 @@ import { useSession } from "next-auth/react";
 import { KeyboardEventHandler, MouseEventHandler, useRef } from "react";
 import { toast } from "sonner";
 
-export function Textarea({
-  className,
-  ...props
-}: Omit<React.ComponentProps<"textarea">, "ref">) {
+export function Textarea({ className, ...props }: Omit<React.ComponentProps<"textarea">, "ref">) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendChat } = useChatContext();
   const { status: sessionStatus } = useSession();
-
-  const focusTextArea = () => {
-    textareaRef.current?.focus();
-  };
-  const unfocusTextArea = () => {
-    textareaRef.current?.blur();
-  };
 
   const onSendButtonClicked: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
@@ -51,11 +31,11 @@ export function Textarea({
   const sendChatMessage = () => {
     if (!textareaRef.current || !textareaRef.current.value.trim()) {
       toast.error("Enter your question");
-      focusTextArea();
+      textareaRef.current?.focus();
       return;
     }
 
-    unfocusTextArea();
+    textareaRef.current?.blur();
     const value = textareaRef.current.value;
     sendChat(value);
     textareaRef.current.value = "";
@@ -66,7 +46,7 @@ export function Textarea({
         "sticky bottom-0 w-full max-h-48 min-h-32 flex flex-col gap-1 px-4 py-3 rounded-t-xl border border-b-0 focus-within:border-ring transition-colors cursor-text bg-muted/60 backdrop-blur-xl shadow overflow-hidden",
         className
       )}
-      onClick={focusTextArea}
+      onClick={() => textareaRef.current?.focus()}
     >
       <section className="flex gap-2">
         <Stars className="size-5 stroke-1 my-0.5 flex-none" />
@@ -88,9 +68,7 @@ export function Textarea({
           size="icon"
           className="rounded-full"
           onClick={onSendButtonClicked}
-          disabled={
-            sessionStatus === "unauthenticated" || sessionStatus === "loading"
-          }
+          disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading"}
         >
           <SendHorizontal className="ml-0.5 size-5" />
         </Button>
@@ -100,17 +78,12 @@ export function Textarea({
 }
 
 function SelectFolder() {
-  const { selectedFolder, setSelectedFolder, folders, loading } =
-    useFilesContext();
+  const { selectedFolder, setSelectedFolder, folders, loading } = useFilesContext();
   const { status: sessionStatus } = useSession();
 
   return (
     <Select
-      disabled={
-        sessionStatus === "unauthenticated" ||
-        sessionStatus === "loading" ||
-        loading
-      }
+      disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading" || loading}
       value={selectedFolder}
       onValueChange={setSelectedFolder}
     >
@@ -159,9 +132,7 @@ function SelectFolder() {
             <SelectItem key={i} value={f.name}>
               <section className="flex flex-col">
                 <p className="text-sm">{folderName}</p>
-                <p className="text-xs font-light text-muted-foreground">
-                  {f.name}
-                </p>
+                <p className="text-xs font-light text-muted-foreground">{f.name}</p>
               </section>
             </SelectItem>
           );
@@ -176,11 +147,7 @@ function SelectFile() {
   const { status: sessionStatus } = useSession();
   return (
     <Select
-      disabled={
-        sessionStatus === "unauthenticated" ||
-        sessionStatus === "loading" ||
-        loading
-      }
+      disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading" || loading}
       value={selectedFile}
       onValueChange={setSelectedFile}
     >
@@ -229,9 +196,7 @@ function SelectFile() {
             <SelectItem key={i} value={f.name}>
               <section className="flex flex-col">
                 <p className="text-sm">{fileName}</p>
-                <p className="text-xs font-light text-muted-foreground">
-                  {f.name}
-                </p>
+                <p className="text-xs font-light text-muted-foreground">{f.name}</p>
               </section>
             </SelectItem>
           );
@@ -251,9 +216,7 @@ function WebSearchToggle() {
         <Toggle
           className="rounded-full border aria-pressed:bg-primary aria-pressed:text-primary-foreground"
           size="icon"
-          disabled={
-            sessionStatus === "unauthenticated" || sessionStatus === "loading"
-          }
+          disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading"}
           pressed={isWebSearchOn}
           onPressedChange={setIsWebSearchOn}
           onSelect={(e) => {
@@ -264,9 +227,7 @@ function WebSearchToggle() {
           <Globe />
         </Toggle>
       </TooltipTrigger>
-      <TooltipContent>
-        Web Search: {isWebSearchOn ? "On" : "Off"}
-      </TooltipContent>
+      <TooltipContent>Web Search: {isWebSearchOn ? "On" : "Off"}</TooltipContent>
     </Tooltip>
   );
 }

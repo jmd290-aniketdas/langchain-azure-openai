@@ -1,9 +1,9 @@
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import ProvidersWrapper from "@/providers/provider-wrapper";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import ProvidersWrapper from "@/providers/provider-wrapper";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -22,12 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={cn(
-          "antialiased border-border outline-ring/50 bg-background text-foreground scrollbar-none",
-          poppins.className
-        )}
-      >
+      <body className={cn("antialiased border-border outline-ring/50 bg-background text-foreground", poppins.className)}>
         <ProvidersWrapper>{children}</ProvidersWrapper>
         <Toaster />
       </body>

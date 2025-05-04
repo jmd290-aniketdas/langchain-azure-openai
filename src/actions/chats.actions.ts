@@ -63,9 +63,11 @@ async function fetchChatInfo(chatId: string): Promise<ChatInfo> {
   });
   if (!chat) throw new Error("No chat found with ID " + chatId);
 
-  const chatInfo: ChatInfo = {
+  const chatInfo: ChatInfo & { messages: Message[] } = {
     chatId: chat.id,
     chatTitle: chat.title,
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt,
     messages: chat.messages.map((m) => ({ role: m.role, content: m.content })),
   };
   return chatInfo;
@@ -85,4 +87,29 @@ async function fetchChatMessages(chatId: string): Promise<Message[]> {
   return messages.map((m) => ({ role: m.role, content: m.content }));
 }
 
-export { createNewChat, chatInvoke, updateChatTitle, createNewMessage, fetchChatInfo, fetchChatTitle, fetchChatMessages };
+async function fetchAllChatIdsForUser(email: string): Promise<ChatInfo[]> {
+  "use server";
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error("User not found");
+
+  const chatIds = await prisma.chat.findMany({ where: { userId: user.id }, orderBy: { updatedAt: "desc" } });
+  if (!chatIds) throw new Error("No chats were found");
+
+  return chatIds.map((chat) => ({
+    chatId: chat.id,
+    chatTitle: chat.title,
+    createdAt: chat.createdAt,
+    updatedAt: chat.updatedAt,
+  }));
+}
+
+export {
+  chatInvoke,
+  createNewChat,
+  createNewMessage,
+  fetchAllChatIdsForUser,
+  fetchChatInfo,
+  fetchChatMessages,
+  fetchChatTitle,
+  updateChatTitle,
+};

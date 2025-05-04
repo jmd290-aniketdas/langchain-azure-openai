@@ -9,38 +9,34 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  MainSidebarMenuContent,
-  SubSidebarMenuContent,
-} from "@/types/menus.types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useChatContext } from "@/contexts/chat-context";
+import { settingsSidebarMenuContent } from "@/lib/menus";
+import { MainSidebarMenuContent, SubSidebarMenuContent } from "@/types/menus.types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import ScratchPad from "../scratchpad";
 
-export function SubMenusContent({
-  activeMenu,
-  fetcher,
-}: {
-  activeMenu?: MainSidebarMenuContent;
-  fetcher?: () => Promise<SubSidebarMenuContent[]>;
-}) {
+export function SubMenusContent({ activeMenu }: { activeMenu?: MainSidebarMenuContent }) {
   const pathname = usePathname();
-
-  const [sidebarMenuContent, setSidebarMenuContent] = useState<
-    SubSidebarMenuContent[]
-  >([]);
+  const { subSidebarChatMenuContent, subSidebarChatMenuContentLoading } = useChatContext();
+  const [sidebarMenuContent, setSidebarMenuContent] = useState<SubSidebarMenuContent[]>([]);
+  const [sidebarMenuContentLoading, setSidebarMenuContentLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (fetcher) {
-      fetcher()
-        .then((res) => setSidebarMenuContent(res))
-        .catch((err) => toast.error(err.message));
+    if (activeMenu?.name === "Chats") {
+      setSidebarMenuContent(subSidebarChatMenuContent);
+      setSidebarMenuContentLoading(subSidebarChatMenuContentLoading);
+    } else if (activeMenu?.name === "Folders") {
+      // TODO
+    } else if (activeMenu?.name === "Settings") {
+      setSidebarMenuContent(settingsSidebarMenuContent);
+      setSidebarMenuContentLoading(false);
     }
-  }, [fetcher]);
+  }, [activeMenu, subSidebarChatMenuContent, subSidebarChatMenuContentLoading, settingsSidebarMenuContent]);
 
-  if (!fetcher || !activeMenu) return <></>;
+  if (!activeMenu) return <></>;
 
   const ActionIcon = activeMenu.action?.icon;
 
@@ -67,23 +63,29 @@ export function SubMenusContent({
       </section>
       <SidebarGroup className="flex-1">
         <SidebarGroupContent className="flex flex-col gap-1">
-          {sidebarMenuContent.map((menu, i) => {
-            const { icon: Icon, name, link } = menu;
-            return (
-              <SidebarMenuItem key={i}>
-                <SidebarMenuButton
-                  tooltip={name}
-                  isActive={pathname === link}
-                  asChild
-                >
-                  <Link href={link}>
-                    <Icon />
-                    <p>{name}</p>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
+          {sidebarMenuContentLoading && (
+            <>
+              <Skeleton className="w-full h-8" />
+              <Skeleton className="w-full h-8" />
+              <Skeleton className="w-full h-8" />
+              <Skeleton className="w-full h-8" />
+              <Skeleton className="w-full h-8" />
+            </>
+          )}
+          {!sidebarMenuContentLoading &&
+            sidebarMenuContent.map((menu, i) => {
+              const { icon: Icon, name, link } = menu;
+              return (
+                <SidebarMenuItem key={i}>
+                  <SidebarMenuButton showTooltip tooltip={name} isActive={pathname === link} asChild>
+                    <Link href={link}>
+                      <Icon />
+                      <p className="whitespace-nowrap text-ellipsis overflow-hidden">{name}</p>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
         </SidebarGroupContent>
       </SidebarGroup>
 

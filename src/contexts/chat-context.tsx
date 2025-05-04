@@ -2,20 +2,27 @@ import {
   chatInvoke,
   createNewChat,
   createNewMessage,
+  fetchAllChatIdsForUser,
   fetchChatMessages,
   fetchChatTitle,
   updateChatTitle,
 } from "@/actions/chats.actions";
 import { sendChatStream } from "@/actions/chats.client.actions";
-import { EMPTY_STORED_MESSAGE } from "@/lib/consts";
+import { CHATS_ROOT_LINK, EMPTY_STORED_MESSAGE, SCRATCHPAD_GEN_SYSTEM_MSG, TITLE_GEN_DEVELOPER_MSG } from "@/lib/consts";
 import { Message } from "@/types/chats.types";
+import { SubSidebarMenuContent } from "@/types/menus.types";
 import { StoredMessage } from "@langchain/core/messages";
+import { MessageCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { createContext, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useModelsContext } from "./models-context";
 
 type ChatContext = {
+  subSidebarChatMenuContent: SubSidebarMenuContent[];
+  subSidebarChatMenuContentLoading: boolean;
+
   chatId: string;
   chatTitle: string;
 
@@ -43,6 +50,9 @@ type ChatContext = {
 const ChatContext = createContext<ChatContext | undefined>(undefined);
 
 const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
+  const [subSidebarChatMenuContent, setSubSidebarChatMenuContent] = useState<SubSidebarMenuContent[]>([]);
+  const [subSidebarChatMenuContentLoading, setSubSidebarChatMenuContentLoading] = useState<boolean>(true);
+
   const [chatId, setChatId] = useState<string>("");
   const [chatTitle, setChatTitle] = useState<string>("");
 
@@ -66,8 +76,32 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
   const pathname = usePathname();
   const { chatId: paramsChatId }: { chatId: string } = useParams();
 
+  const fetchAllChatInfosForUser = (email: string) => {
+    fetchAllChatIdsForUser(email)
+      .then((res) =>
+        setSubSidebarChatMenuContent(
+          res.map((r) => ({
+            name: r.chatTitle,
+            icon: MessageCircle,
+            link: `${CHATS_ROOT_LINK}/${r.chatId}`,
+            searchTerms: [r.chatTitle, r.createdAt.toDateString(), r.updatedAt.toDateString()],
+          }))
+        )
+      )
+      .catch((err) => {
+        console.error(err);
+        toast.error(err.message);
+      })
+      .finally(() => setSubSidebarChatMenuContentLoading(false));
+  };
+
   useEffect(() => {
-    if (!pathname.includes("/chats")) return;
+    if (!session) return;
+    fetchAllChatInfosForUser(session.user.email);
+  }, [session]);
+
+  useEffect(() => {
+    if (!pathname.includes(CHATS_ROOT_LINK)) return;
     if (!paramsChatId) newChat();
     else loadChat(paramsChatId);
   }, [pathname, paramsChatId]);
@@ -84,7 +118,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       setMessages(chatMessages);
     } catch (error) {
       console.error(error);
-      router.push("/chats");
+      router.push(CHATS_ROOT_LINK);
     } finally {
       setChatLoading(false);
     }
@@ -102,46 +136,41 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
     try {
       if (sessionStatus !== "authenticated") throw new Error("Not Authenticated");
 
+      const _messages = [...messages];
       const userMessage: Message = { role: "user", content: message };
+
+      setMessages([..._messages, userMessage]);
 
       let newChatId: string = "";
       if (!chatId) {
         const newChat = await createNewChat(session.user.email);
         newChatId = newChat.id;
         setChatId(newChat.id);
-        router.push(`/chats/${newChat.id}`);
+        router.push(`${CHATS_ROOT_LINK}/${newChat.id}`);
       }
-
-      setMessages([...messages, userMessage]);
 
       const res = await sendChatStream({
         modelName: selectedModel,
-        messages: [...messages, userMessage],
+        messages: [..._messages, userMessage],
         streamingTextSetter: setChatTextStream,
         loadingSetter: setChatLoading,
         streamingSetter: setChatStreaming,
         responseSetter: setChatTextResponse,
       });
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: res.data.content,
-      };
+      const assistantMessage: Message = { role: "assistant", content: res.data.content };
 
-      setMessages([...messages, userMessage, assistantMessage]);
+      setMessages([..._messages, userMessage, assistantMessage]);
 
       if (newChatId) {
         await createNewMessage(newChatId, userMessage);
         await createNewMessage(newChatId, assistantMessage);
 
-        const developerMessage: Message = {
-          role: "developer",
-          content:
-            "Summerize the context of the above message into a meaningful title. Return only the Title without any other unnecessary data.",
-        };
+        const developerMessage: Message = { role: "developer", content: TITLE_GEN_DEVELOPER_MSG };
         const titleRes = await chatInvoke(selectedModel, [...messages, userMessage, assistantMessage, developerMessage]);
         setChatTitle(titleRes.data.content);
         await updateChatTitle(newChatId, titleRes.data.content);
+        fetchAllChatInfosForUser(session.user.email);
       } else {
         await createNewMessage(chatId, userMessage);
         await createNewMessage(chatId, assistantMessage);
@@ -149,6 +178,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
 
       return res;
     } catch (error) {
+      setChatTextStream("An error occured");
       throw error;
     }
   };
@@ -156,15 +186,8 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
   const sendScratchpadChat = async (message: string) => {
     try {
       setScratchpadTextStream(message);
-      const systemMessage: Message = {
-        role: "system",
-        content:
-          "You are an intelligent AI model who helps in solving problems, and gives very precise and concise answers according to the context of the user",
-      };
-      const userMessage: Message = {
-        role: "user",
-        content: message,
-      };
+      const systemMessage: Message = { role: "system", content: SCRATCHPAD_GEN_SYSTEM_MSG };
+      const userMessage: Message = { role: "user", content: message };
       const res = await sendChatStream({
         modelName: selectedModel,
         messages: [systemMessage, userMessage],
@@ -183,6 +206,8 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
   return (
     <ChatContext.Provider
       value={{
+        subSidebarChatMenuContent,
+        subSidebarChatMenuContentLoading,
         chatId,
         chatTitle,
         messages,

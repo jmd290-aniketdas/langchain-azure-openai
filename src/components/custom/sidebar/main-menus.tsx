@@ -1,10 +1,7 @@
 "use client";
 
-import { fetchMainSidebarMenuContent } from "@/actions/menus.actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -12,13 +9,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { mainSidebarMenuContent } from "@/lib/menus";
 import { MainSidebarMenuContent } from "@/types/menus.types";
-import { Session } from "next-auth";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import Logo from "../logo";
-import { getAbbreviatedName } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import Logo from "../logo";
 
 const pathnameMap = [
   { id: "chats", activeMenu: "Chats" },
@@ -31,29 +26,15 @@ export function MainMenus({
   setActiveMenuAction,
 }: {
   activeMenu?: MainSidebarMenuContent;
-  setActiveMenuAction: React.Dispatch<
-    React.SetStateAction<MainSidebarMenuContent | undefined>
-  >;
+  setActiveMenuAction: React.Dispatch<React.SetStateAction<MainSidebarMenuContent | undefined>>;
 }) {
   const pathname = usePathname();
 
-  const [mainSidebarMenuContent, setMainMenuSidebarContent] = useState<
-    MainSidebarMenuContent[]
-  >([]);
-
   useEffect(() => {
-    fetchMainSidebarMenuContent()
-      .then((res) => {
-        setMainMenuSidebarContent(res);
-
-        const currentActivePath = pathname.split("/")[1];
-        const activeMenu = pathnameMap.find((m) => m.id === currentActivePath);
-        const activeMenuObj = res.find(
-          (r) => r.name === activeMenu?.activeMenu
-        );
-        setActiveMenuAction(activeMenuObj);
-      })
-      .catch((err) => toast.error(err.message));
+    const currentActivePath = pathname.split("/")[1];
+    const activeMenu = pathnameMap.find((m) => m.id === currentActivePath);
+    const activeMenuObj = mainSidebarMenuContent.find((r) => r.name === activeMenu?.activeMenu);
+    setActiveMenuAction(activeMenuObj);
   }, []);
 
   return (
