@@ -9,13 +9,15 @@ import { useFilesContext } from "@/contexts/files-context";
 import { cn } from "@/lib/utils";
 import { File, Folder, Globe, SendHorizontal, Stars } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { KeyboardEventHandler, MouseEventHandler, useRef } from "react";
+import { useParams } from "next/navigation";
+import { KeyboardEventHandler, MouseEventHandler, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 export function Textarea({ className, ...props }: Omit<React.ComponentProps<"textarea">, "ref">) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendChat } = useChatContext();
+  const { sendChat, generateNewChat } = useChatContext();
   const { status: sessionStatus } = useSession();
+  const { chatId: paramsChatId }: { chatId: string } = useParams();
 
   const onSendButtonClicked: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
@@ -37,7 +39,10 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
 
     textareaRef.current?.blur();
     const value = textareaRef.current.value;
-    sendChat(value);
+    if(paramsChatId)
+      sendChat(value);
+    else
+      generateNewChat(value);
     textareaRef.current.value = "";
   };
   return (

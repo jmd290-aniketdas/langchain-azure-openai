@@ -23,8 +23,9 @@ type ChatContext = {
   subSidebarChatMenuContent: SubSidebarMenuContent[];
   subSidebarChatMenuContentLoading: boolean;
 
-  chatId: string;
-  chatTitle: string;
+  currentChatId: string;
+  currentChatTitle: string;
+  currentChatContextLoading: boolean;
 
   messages: Message[];
 
@@ -40,7 +41,8 @@ type ChatContext = {
 
   loadChat: (chatId: string) => Promise<void>;
   newChat: () => void;
-  sendChat: (message: string) => Promise<StoredMessage>;
+  sendChat: (message: string) => Promise<void>;
+  generateNewChat: (message: string) => Promise<void>;
   sendScratchpadChat: (message: string) => Promise<StoredMessage>;
 
   isWebSearchOn: boolean;
@@ -50,11 +52,18 @@ type ChatContext = {
 const ChatContext = createContext<ChatContext | undefined>(undefined);
 
 const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
+  const { selectedModel } = useModelsContext();
+  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { chatId: paramsChatId }: { chatId: string } = useParams();
+
   const [subSidebarChatMenuContent, setSubSidebarChatMenuContent] = useState<SubSidebarMenuContent[]>([]);
   const [subSidebarChatMenuContentLoading, setSubSidebarChatMenuContentLoading] = useState<boolean>(true);
 
-  const [chatId, setChatId] = useState<string>("");
-  const [chatTitle, setChatTitle] = useState<string>("");
+  const [currentChatId, setCurrentChatId] = useState<string>("");
+  const [currentChatTitle, setCurrentChatTitle] = useState<string>("");
+  const [currentChatContextLoading, setCurrentChatContextLoading] = useState<boolean>(!!paramsChatId);
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -69,12 +78,6 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
   const [scratchpadStreaming, setScratchpadStreaming] = useState<boolean>(false);
 
   const [isWebSearchOn, setIsWebSearchOn] = useState<boolean>(false);
-
-  const { selectedModel } = useModelsContext();
-  const { data: session, status: sessionStatus } = useSession();
-  const router = useRouter();
-  const pathname = usePathname();
-  const { chatId: paramsChatId }: { chatId: string } = useParams();
 
   const fetchAllChatInfosForUser = (email: string) => {
     fetchAllChatIdsForUser(email)
@@ -107,12 +110,17 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
   }, [pathname, paramsChatId]);
 
   const loadChat = async (_chatId: string) => {
-    setChatLoading(true);
+    if (messages.length === 1) {
+      await sendNewChat();
+      return;
+    }
+
+    setCurrentChatContextLoading(true);
     try {
-      setChatId(_chatId);
+      setCurrentChatId(_chatId);
 
       const chatTitle = await fetchChatTitle(_chatId);
-      setChatTitle(chatTitle);
+      setCurrentChatTitle(chatTitle);
 
       const chatMessages = await fetchChatMessages(_chatId);
       setMessages(chatMessages);
@@ -120,16 +128,62 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       console.error(error);
       router.push(CHATS_ROOT_LINK);
     } finally {
-      setChatLoading(false);
+      setCurrentChatContextLoading(false);
     }
   };
 
   const newChat = () => {
-    setChatLoading(true);
-    setChatId("");
-    setChatTitle("New Chat");
+    setCurrentChatContextLoading(true);
+    setCurrentChatId("");
+    setCurrentChatTitle("New Chat");
     setMessages([]);
-    setChatLoading(false);
+    setCurrentChatContextLoading(false);
+  };
+
+  const generateNewChat = async (message: string) => {
+    if (sessionStatus !== "authenticated") throw new Error("Not Authenticated");
+
+    const newChat = await createNewChat(session.user.email);
+
+    const _messages = [...messages];
+    const userMessage: Message = { role: "user", content: message };
+
+    setCurrentChatId(newChat.id);
+    setChatLoading(true);
+    setMessages([..._messages, userMessage]);
+
+    router.push(`${CHATS_ROOT_LINK}/${newChat.id}`);
+  };
+
+  const sendNewChat = async () => {
+    try {
+      if (sessionStatus !== "authenticated") throw new Error("Not Authenticated");
+
+      const res = await sendChatStream({
+        modelName: selectedModel,
+        messages: [...messages],
+        streamingTextSetter: setChatTextStream,
+        loadingSetter: setChatLoading,
+        streamingSetter: setChatStreaming,
+        responseSetter: setChatTextResponse,
+      });
+
+      const assistantMessage: Message = { role: "assistant", content: res.data.content };
+
+      setMessages([...messages, assistantMessage]);
+      setChatTextStream("");
+
+      await createNewMessage(currentChatId, assistantMessage);
+
+      const developerMessage: Message = { role: "developer", content: TITLE_GEN_DEVELOPER_MSG };
+      const titleRes = await chatInvoke(selectedModel, [...messages, assistantMessage, developerMessage]);
+      setCurrentChatTitle(titleRes.data.content);
+      await updateChatTitle(currentChatId, titleRes.data.content);
+      fetchAllChatInfosForUser(session.user.email);
+    } catch (error) {
+      setChatTextStream("An error occured");
+      throw error;
+    }
   };
 
   const sendChat = async (message: string) => {
@@ -140,14 +194,6 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       const userMessage: Message = { role: "user", content: message };
 
       setMessages([..._messages, userMessage]);
-
-      let newChatId: string = "";
-      if (!chatId) {
-        const newChat = await createNewChat(session.user.email);
-        newChatId = newChat.id;
-        setChatId(newChat.id);
-        router.push(`${CHATS_ROOT_LINK}/${newChat.id}`);
-      }
 
       const res = await sendChatStream({
         modelName: selectedModel,
@@ -161,22 +207,10 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       const assistantMessage: Message = { role: "assistant", content: res.data.content };
 
       setMessages([..._messages, userMessage, assistantMessage]);
+      setChatTextStream("");
 
-      if (newChatId) {
-        await createNewMessage(newChatId, userMessage);
-        await createNewMessage(newChatId, assistantMessage);
-
-        const developerMessage: Message = { role: "developer", content: TITLE_GEN_DEVELOPER_MSG };
-        const titleRes = await chatInvoke(selectedModel, [...messages, userMessage, assistantMessage, developerMessage]);
-        setChatTitle(titleRes.data.content);
-        await updateChatTitle(newChatId, titleRes.data.content);
-        fetchAllChatInfosForUser(session.user.email);
-      } else {
-        await createNewMessage(chatId, userMessage);
-        await createNewMessage(chatId, assistantMessage);
-      }
-
-      return res;
+      await createNewMessage(currentChatId, userMessage);
+      await createNewMessage(currentChatId, assistantMessage);
     } catch (error) {
       setChatTextStream("An error occured");
       throw error;
@@ -208,8 +242,9 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       value={{
         subSidebarChatMenuContent,
         subSidebarChatMenuContentLoading,
-        chatId,
-        chatTitle,
+        currentChatId,
+        currentChatTitle,
+        currentChatContextLoading,
         messages,
         chatTextStream,
         chatTextResponse,
@@ -221,6 +256,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
         scratchpadStreaming,
         loadChat,
         newChat,
+        generateNewChat,
         sendChat,
         sendScratchpadChat,
         isWebSearchOn,

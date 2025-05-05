@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function AppTopbar({ className }: { className?: string }) {
   const { availableModels, selectedModel, setSelectedModel, selectedModelLoading } = useModelsContext();
-  const { chatTitle } = useChatContext();
+  const { currentChatTitle, currentChatContextLoading } = useChatContext();
   const pathname = usePathname();
 
   return (
@@ -25,7 +25,7 @@ export function AppTopbar({ className }: { className?: string }) {
         className
       )}
     >
-      <section className="flex gap-4 items-center h-full max-w-1/2">
+      <section className="flex gap-4 items-center h-full w-full max-w-1/2">
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarTrigger />
@@ -38,7 +38,13 @@ export function AppTopbar({ className }: { className?: string }) {
         {pathname.includes(CHATS_ROOT_LINK) && (
           <>
             <hr className="w-px h-full bg-muted-foreground" />
-            <p className="text-sm text-muted-foreground whitespace-nowrap truncate">{chatTitle ? chatTitle : "New Chat"}</p>
+            {currentChatContextLoading ? (
+              <Skeleton className="size-full max-w-48" />
+            ) : (
+              <p className="text-sm text-muted-foreground whitespace-nowrap truncate">
+                {currentChatTitle ? currentChatTitle : "New Chat"}
+              </p>
+            )}
           </>
         )}
       </section>

@@ -9,10 +9,13 @@
 @theme {
   --font-poppins: var(--font-poppins);
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-accordion-down: kf-accordion-down 0.2s ease-out;
+  --animate-accordion-up: kf-accordion-up 0.2s ease-out;
+  --animate-enter: kf-enter 150ms forwards ease-in-out;
+  --animate-enter-exit: kf-enter-exit 150ms forwards ease-in-out;
+  --animate-enter-delayed-exit: kf-enter-delayed-exit 2s ease-in-out;
 
-  @keyframes accordion-down {
+  @keyframes kf-accordion-down {
     from {
       height: 0;
     }
@@ -21,12 +24,66 @@
     }
   }
   
-  @keyframes accordion-up {
+  @keyframes kf-accordion-up {
     from {
       height: var(--radix-accordion-content-height);
     }
     to {
       height: 0;
+    }
+  }
+
+  @keyframes kf-enter {
+    from {
+      opacity: var(--from-opacity, 1);
+      scale: var(--from-scale, 1);
+      transform: translate(var(--from-translate-x, 0), var(--from-translate-y, 0));
+    }
+    to {
+      opacity: var(--to-opacity, 1);
+      scale: var(--to-scale, 1);
+      transform: translate(var(--to-translate-x, 0), var(--to-translate-y, 0));
+    }
+  }
+
+  @keyframes kf-enter-exit {
+    0% {
+      opacity: var(--from-opacity, 1);
+      scale: var(--from-scale, 1);
+      transform: translate(var(--from-translate-x, 0), var(--from-translate-y, 0));
+    }
+    50% {
+      opacity: var(--via-opacity, --to-opacity, 1);
+      scale: var(--via-scale, --to-scale, 1);
+      transform: translate(var(--via-translate-x, --to-translate-x, 0), var(--via-translate-y, --to-translate-y, 0));
+    }
+    100% {
+      opacity: var(--to-opacity, 1);
+      scale: var(--to-scale, 1);
+      transform: translate(var(--to-translate-x, 0), var(--to-translate-y, 0));
+    }
+  }
+
+  @keyframes kf-enter-delayed-exit {
+    0% {
+      opacity: var(--from-opacity, 1);
+      scale: var(--from-scale, 1);
+      transform: translate(var(--from-translate-x, 0), var(--from-translate-y, 0));
+    }
+    35% {
+      opacity: var(--via-opacity, --to-opacity, 1);
+      scale: var(--via-scale, --to-scale, 1);
+      transform: translate(var(--via-translate-x, --to-translate-x, 0), var(--via-translate-y, --to-translate-y, 0));
+    }
+    65% {
+      opacity: var(--via-opacity, --to-opacity, 1);
+      scale: var(--via-scale, --to-scale, 1);
+      transform: translate(var(--via-translate-x, --to-translate-x, 0), var(--via-translate-y, --to-translate-y, 0));
+    }
+    100% {
+      opacity: var(--to-opacity, 1);
+      scale: var(--to-scale, 1);
+      transform: translate(var(--to-translate-x, 0), var(--to-translate-y, 0));
     }
   }
 }
@@ -162,4 +219,104 @@
   pre {
     @apply w-full overflow-auto border rounded p-1
   }
+}
+
+@utility animation-from-opacity-* {
+  --from-opacity: --value(--opacity-*, [percentage]);
+  --from-opacity: calc(--value(integer) * 1%);
+  opacity: var(--from-opacity);
+}
+
+@utility animation-via-opacity-* {
+  --via-opacity: --value(--opacity-*, [percentage]);
+  --via-opacity: calc(--value(integer) * 1%);
+}
+
+@utility animation-to-opacity-* {
+  --to-opacity: --value(--opacity-*, [percentage]);
+  --to-opacity: calc(--value(integer) * 1%);
+}
+
+@utility animation-from-scale-* {
+  --from-scale: --value([length]);
+  --from-scale: calc(--value(integer) / 100);
+  scale: var(--from-scale);
+}
+
+@utility -animation-from-scale-* {
+  --from-scale: calc(--value([length]) * -1);
+  --from-scale: calc(--value(integer) * -1 / 100);
+  scale: var(--from-scale);
+}
+
+@utility animation-via-scale-* {
+  --via-scale: --value([length]);
+  --via-scale: calc(--value(integer) / 100);
+}
+
+@utility -animation-via-scale-* {
+  --via-scale: calc(--value([length]) * -1);
+  --via-scale: calc(--value(integer) * -1 / 100);
+}
+
+@utility animation-to-scale-* {
+  --to-scale: --value([length]);
+  --to-scale: calc(--value(integer) / 100);
+}
+
+@utility -animation-to-scale-* {
+  --to-scale: calc(--value([length]) * -1);
+  --to-scale: calc(--value(integer) * -1 / 100);
+}
+
+@utility animation-from-translate-y-* {
+  --from-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]));
+  transform: translate(var(--from-translate-x), var(--from-translate-y));
+}
+
+@utility -animation-from-translate-y-* {
+  --from-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
+  transform: translate(var(--from-translate-x), var(--from-translate-y));
+}
+
+@utility animation-via-translate-y-* {
+  --via-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]));
+}
+
+@utility -animation-via-translate-y-* {
+  --via-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
+}
+
+@utility animation-to-translate-y-* {
+  --to-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]));
+}
+
+@utility -animation-to-translate-y-* {
+  --to-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
+}
+
+@utility animation-from-translate-x-* {
+  --from-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]));
+  transform: translate(var(--from-translate-x), var(--from-translate-y));
+}
+
+@utility -animation-from-translate-x-* {
+  --from-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
+  transform: translate(var(--from-translate-x), var(--from-translate-y));
+}
+
+@utility animation-via-translate-x-* {
+  --via-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]));
+}
+
+@utility -animation-via-translate-x-* {
+  --via-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
+}
+
+@utility animation-to-translate-x-* {
+  --to-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]));
+}
+
+@utility -animation-to-translate-x-* {
+  --to-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
 }

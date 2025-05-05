@@ -21,18 +21,8 @@ export type DateTimeOffsets = {
  * @param offsets - Object specifying how much to add to each part.
  * @returns A new Date object, adjusted by the specified offsets.
  */
-export function addDateTime(
-  baseDate: Date,
-  offsets: DateTimeOffsets = {}
-): Date {
-  const {
-    years = 0,
-    months = 0,
-    days = 0,
-    hours = 0,
-    minutes = 0,
-    seconds = 0,
-  } = offsets;
+export function addDateTime(baseDate: Date, offsets: DateTimeOffsets = {}): Date {
+  const { years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0 } = offsets;
 
   const newDate = new Date(baseDate.getTime());
 
@@ -65,9 +55,7 @@ export function camelToCapitalized(str: string): string {
 
 export const DEFAULT_BACKUP_CODE_SEGMENT_LENGTH = 3;
 export function generateBackupCode(segmentLength?: number) {
-  const segments = new Uint16Array(
-    segmentLength || DEFAULT_BACKUP_CODE_SEGMENT_LENGTH
-  );
+  const segments = new Uint16Array(segmentLength || DEFAULT_BACKUP_CODE_SEGMENT_LENGTH);
   crypto.getRandomValues(segments);
 
   const backupCode = Array.from(segments)
@@ -147,5 +135,8 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }
 
-export const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const clamp = (x: number, min: number, max: number) => {
+  return Math.min(Math.max(x, min), max);
+};

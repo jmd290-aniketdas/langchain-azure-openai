@@ -3,7 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { Feather } from "lucide-react";
 
 const logoVariants = cva(
-  "rounded transition-colors flex [&_svg]:flex-1 [&_svg]:h-full [&_svg]:aspect-square place-items-center",
+  "rounded transition-colors flex [&_svg]:flex-1 [&_svg]:h-full [&_svg]:aspect-square place-items-center place-content-center",
   {
     variants: {
       variant: {
