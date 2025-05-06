@@ -10,13 +10,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useChatContext } from "@/contexts/chat-context";
 import { settingsSidebarMenuContent } from "@/lib/menus";
 import { MainSidebarMenuContent, SubSidebarMenuContent } from "@/types/menus.types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ScratchPad from "../scratchpad";
+import { useChatContext } from "@/contexts/chat-context";
 
 export function SubMenusContent({ activeMenu }: { activeMenu?: MainSidebarMenuContent }) {
   const pathname = usePathname();

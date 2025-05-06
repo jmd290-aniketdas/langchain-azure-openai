@@ -10,12 +10,12 @@ import { cn } from "@/lib/utils";
 import { File, Folder, Globe, SendHorizontal, Stars } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { KeyboardEventHandler, MouseEventHandler, useEffect, useRef } from "react";
+import { KeyboardEventHandler, MouseEventHandler, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 export function Textarea({ className, ...props }: Omit<React.ComponentProps<"textarea">, "ref">) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendChat, generateNewChat } = useChatContext();
+  const { sendChat, generateNewChatIdAndNavigate, messageLoading, currentChatContextLoading } = useChatContext();
   const { status: sessionStatus } = useSession();
   const { chatId: paramsChatId }: { chatId: string } = useParams();
 
@@ -30,7 +30,9 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
       sendChatMessage();
     }
   };
-  const sendChatMessage = () => {
+  const sendChatMessage = useCallback(() => {
+    if (sessionStatus === "unauthenticated" || sessionStatus === "loading" || currentChatContextLoading || messageLoading)
+      return;
     if (!textareaRef.current || !textareaRef.current.value.trim()) {
       toast.error("Enter your question");
       textareaRef.current?.focus();
@@ -39,12 +41,13 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
 
     textareaRef.current?.blur();
     const value = textareaRef.current.value;
-    if(paramsChatId)
-      sendChat(value);
-    else
-      generateNewChat(value);
+
+    if (paramsChatId) sendChat(value);
+    else generateNewChatIdAndNavigate(value);
+
     textareaRef.current.value = "";
-  };
+  }, [paramsChatId, textareaRef]);
+
   return (
     <div
       className={cn(
@@ -73,7 +76,9 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
           size="icon"
           className="rounded-full"
           onClick={onSendButtonClicked}
-          disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading"}
+          disabled={
+            sessionStatus === "unauthenticated" || sessionStatus === "loading" || currentChatContextLoading || messageLoading
+          }
         >
           <SendHorizontal className="ml-0.5 size-5" />
         </Button>
@@ -212,7 +217,7 @@ function SelectFile() {
 }
 
 function WebSearchToggle() {
-  const { isWebSearchOn, setIsWebSearchOn } = useChatContext();
+  const { isWebSearchOn, setIsWebSearchOn, isWebSearchOnLoading } = useChatContext();
   const { status: sessionStatus } = useSession();
 
   return (
@@ -221,7 +226,7 @@ function WebSearchToggle() {
         <Toggle
           className="rounded-full border aria-pressed:bg-primary aria-pressed:text-primary-foreground"
           size="icon"
-          disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading"}
+          disabled={sessionStatus === "unauthenticated" || sessionStatus === "loading" || isWebSearchOnLoading}
           pressed={isWebSearchOn}
           onPressedChange={setIsWebSearchOn}
           onSelect={(e) => {

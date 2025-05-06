@@ -1,20 +1,15 @@
 "use client";
 
 import Logo from "@/components/custom/logo";
-import { useChatContext } from "@/contexts/chat-context";
 import { cn } from "@/lib/utils";
 import { Session } from "next-auth";
-import { useEffect } from "react";
 import { ChatBubble } from "./chat-bubble";
 import { ChatBubbleSkeleton } from "./chat-bubble-skeleton";
 import { ChatBubbleLoading } from "./chat-bubble-loading";
+import { useChatContext } from "@/contexts/chat-context";
 
 export function ChatDisplay({ user, className }: { user: Session["user"]; className?: string }) {
-  const { currentChatContextLoading, messages, chatLoading, chatStreaming, chatTextStream } = useChatContext();
-
-  useEffect(() => {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-  }, [chatTextStream]);
+  const { currentChatContextLoading, messages, messageLoading } = useChatContext();
 
   return (
     <div
@@ -43,10 +38,7 @@ export function ChatDisplay({ user, className }: { user: Session["user"]; classN
       )}
       {!currentChatContextLoading &&
         messages.map((message, i) => <ChatBubble message={message} user={user} index={i} key={i} />)}
-      {!currentChatContextLoading && chatLoading && <ChatBubbleLoading />}
-      {!currentChatContextLoading && !chatLoading && chatStreaming && (
-        <ChatBubble message={{ role: "assistant", content: chatTextStream }} user={user} />
-      )}
+      {!currentChatContextLoading && messageLoading && <ChatBubbleLoading />}
     </div>
   );
 }
