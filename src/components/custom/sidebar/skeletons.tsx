@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Logo from "../logo";
+import { clamp } from "@/lib/utils";
 
 export function SidebarSkeletonSmall() {
   return (
@@ -27,9 +28,19 @@ export function SidebarSkeletonSmall() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="space-y-1">
-            <Skeleton className="w-full aspect-square" />
-            <Skeleton className="w-full aspect-square" />
-            <Skeleton className="w-full aspect-square" />
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton
+                  key={i}
+                  style={
+                    {
+                      "--animate-delay": `${i ? clamp(i * 133.33, 0, 1333.3) : 0}ms`,
+                    } as React.CSSProperties
+                  }
+                  className="size-8 animation-from-translate-y-16 animation-via-translate-0 -animation-to-translate-y-4 animation-from-opacity-0 animation-via-opacity-100 animation-to-opacity-0 animate-enter-delayed-exit ease-in-out repeat-infinite delay-(--animate-delay)"
+                />
+              ))}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -65,11 +76,19 @@ export function SidebarSkeletonLarge() {
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupContent className="space-y-1">
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton
+                  key={i}
+                  style={
+                    {
+                      "--animate-delay": `${i ? clamp(i * 133.33, 0, 1333.3) : 0}ms`,
+                    } as React.CSSProperties
+                  }
+                  className="w-full h-8 animation-from-translate-y-16 animation-via-translate-0 -animation-to-translate-y-4 animation-from-opacity-0 animation-via-opacity-100 animation-to-opacity-0 animate-enter-delayed-exit ease-in-out repeat-infinite delay-(--animate-delay)"
+                />
+              ))}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

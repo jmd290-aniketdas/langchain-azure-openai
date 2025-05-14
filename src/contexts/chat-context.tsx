@@ -29,6 +29,7 @@ type ChatContext = {
 
   messages: Message[];
   messageLoading: boolean;
+  messageGenerating: boolean;
 
   isWebSearchOn: boolean;
   setIsWebSearchOn: (value: boolean) => void;
@@ -59,6 +60,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
+  const [messageGenerating, setMessageGenerating] = useState<boolean>(false);
 
   const [isWebSearchOn, setIsWebSearchOn, isWebSearchOnLoading] = useLocalStorage<boolean>("isWebSearchOn", false);
 
@@ -111,11 +113,13 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
       let accumulatedAssistantMessage: Message = { role: "assistant", content: "" };
       for await (const chunk of chatStream(selectedModel, messages)) {
         setMessageLoading(() => false);
+        setMessageGenerating(() => true);
 
         accumulatedAssistantMessage = {
           ...accumulatedAssistantMessage,
           content: accumulatedAssistantMessage.content + chunk.data.content,
         };
+
         setMessages((m) => {
           const last = m.at(-1);
           if (!last) return [accumulatedAssistantMessage];
@@ -125,6 +129,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
           return [...m, accumulatedAssistantMessage];
         });
       }
+      setMessageGenerating(() => false);
 
       await createNewMessage(currentChatId, accumulatedAssistantMessage);
       await generateNewChatTitle();
@@ -144,11 +149,13 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
 
       for await (const chunk of chatStream(selectedModel, [...messages, userMessage])) {
         setMessageLoading(() => false);
+        setMessageGenerating(() => true);
 
         accumulatedAssistantMessage = {
           ...accumulatedAssistantMessage,
           content: accumulatedAssistantMessage.content + chunk.data.content,
         };
+
         setMessages((m) => {
           const last = m.at(-1);
           if (!last) return [accumulatedAssistantMessage];
@@ -158,6 +165,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
           return [...m, accumulatedAssistantMessage];
         });
       }
+      setMessageGenerating(() => false);
 
       await createNewMessage(currentChatId, userMessage);
       await createNewMessage(currentChatId, accumulatedAssistantMessage);
@@ -215,6 +223,7 @@ const ChatProvider = ({ children }: { children?: React.ReactNode }) => {
         currentChatContextLoading,
         messages,
         messageLoading,
+        messageGenerating,
         isWebSearchOn,
         setIsWebSearchOn,
         isWebSearchOnLoading,

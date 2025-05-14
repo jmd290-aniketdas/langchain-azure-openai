@@ -15,7 +15,8 @@ import { toast } from "sonner";
 
 export function Textarea({ className, ...props }: Omit<React.ComponentProps<"textarea">, "ref">) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendChat, generateNewChatIdAndNavigate, messageLoading, currentChatContextLoading } = useChatContext();
+  const { sendChat, generateNewChatIdAndNavigate, messageLoading, messageGenerating, currentChatContextLoading } =
+    useChatContext();
   const { status: sessionStatus } = useSession();
   const { chatId: paramsChatId }: { chatId: string } = useParams();
 
@@ -24,15 +25,22 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
     sendChatMessage();
   };
   const onKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
       sendChatMessage();
     }
   };
   const sendChatMessage = useCallback(() => {
-    if (sessionStatus === "unauthenticated" || sessionStatus === "loading" || currentChatContextLoading || messageLoading)
+    if (
+      sessionStatus === "unauthenticated" ||
+      sessionStatus === "loading" ||
+      currentChatContextLoading ||
+      messageLoading ||
+      messageGenerating
+    )
       return;
+
     if (!textareaRef.current || !textareaRef.current.value.trim()) {
       toast.error("Enter your question");
       textareaRef.current?.focus();
@@ -46,7 +54,7 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
     else generateNewChatIdAndNavigate(value);
 
     textareaRef.current.value = "";
-  }, [paramsChatId, textareaRef]);
+  }, [paramsChatId, textareaRef, sessionStatus, currentChatContextLoading, messageLoading, messageGenerating]);
 
   return (
     <div
@@ -77,7 +85,11 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
           className="rounded-full"
           onClick={onSendButtonClicked}
           disabled={
-            sessionStatus === "unauthenticated" || sessionStatus === "loading" || currentChatContextLoading || messageLoading
+            sessionStatus === "unauthenticated" ||
+            sessionStatus === "loading" ||
+            currentChatContextLoading ||
+            messageLoading ||
+            messageGenerating
           }
         >
           <SendHorizontal className="ml-0.5 size-5" />

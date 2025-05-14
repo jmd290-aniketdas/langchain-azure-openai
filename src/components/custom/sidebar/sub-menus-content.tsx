@@ -17,6 +17,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ScratchPad from "../scratchpad";
 import { useChatContext } from "@/contexts/chat-context";
+import { clamp } from "@/lib/utils";
 
 export function SubMenusContent({ activeMenu }: { activeMenu?: MainSidebarMenuContent }) {
   const pathname = usePathname();
@@ -63,15 +64,20 @@ export function SubMenusContent({ activeMenu }: { activeMenu?: MainSidebarMenuCo
       </section>
       <SidebarGroup className="flex-1">
         <SidebarGroupContent className="flex flex-col gap-1">
-          {sidebarMenuContentLoading && (
-            <>
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
-              <Skeleton className="w-full h-8" />
-            </>
-          )}
+          {sidebarMenuContentLoading &&
+            Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton
+                  key={i}
+                  style={
+                    {
+                      "--animate-delay": `${i ? clamp(i * 133.33, 0, 1333.3) : 0}ms`,
+                    } as React.CSSProperties
+                  }
+                  className="w-full h-8 animation-from-translate-y-16 animation-via-translate-0 -animation-to-translate-y-4 animation-from-opacity-0 animation-via-opacity-100 animation-to-opacity-0 animate-enter-delayed-exit ease-in-out repeat-infinite delay-(--animate-delay)"
+                />
+              ))}
           {!sidebarMenuContentLoading &&
             sidebarMenuContent.map((menu, i) => {
               const { icon: Icon, name, link } = menu;

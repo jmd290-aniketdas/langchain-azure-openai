@@ -9,11 +9,11 @@
 @theme {
   --font-poppins: var(--font-poppins);
 
-  --animate-accordion-down: kf-accordion-down 0.2s ease-out;
-  --animate-accordion-up: kf-accordion-up 0.2s ease-out;
-  --animate-enter: kf-enter 150ms forwards ease-in-out;
-  --animate-enter-exit: kf-enter-exit 150ms forwards ease-in-out;
-  --animate-enter-delayed-exit: kf-enter-delayed-exit 2s ease-in-out;
+  --animate-accordion-down: kf-accordion-down var(--tw-duration, 200ms) var(--tw-ease, ease-out);
+  --animate-accordion-up: kf-accordion-up var(--tw-duration, 200ms) var(--tw-ease, ease-out);
+  --animate-enter: kf-enter var(--tw-duration, 150ms) forwards var(--tw-ease, ease-in-out);
+  --animate-enter-exit: kf-enter-exit var(--tw-duration, 150ms) forwards var(--tw-ease, ease-in-out);
+  --animate-enter-delayed-exit: kf-enter-delayed-exit var(--tw-duration, 2s) var(--tw-ease, ease-in-out);
 
   @keyframes kf-accordion-down {
     from {
@@ -108,6 +108,7 @@
   --border: hsl(0 0% 14.9%);
   --input: hsl(0 0% 14.9%);
   --ring: hsl(0 0% 83.1%);
+
   --chart-1: hsl(359 2% 90%);
   --chart-2: hsl(240 1% 74%);
   --chart-3: hsl(240 1% 58%);
@@ -128,6 +129,16 @@
   --sidebar-width: 19rem;
   --sidebar-width-icon: 3rem;
   --header-height: 3rem;
+
+  --hljs-color-0: #444;
+  --hljs-color-1: #697070;
+  --hljs-color-2: #444a;
+  --hljs-color-3: #880000;
+  --hljs-color-4: #ab5656;
+  --hljs-color-5: #695;
+  --hljs-color-6: #397300;
+  --hljs-color-7: #1f7199;
+  --hljs-color-8: #38a;
 }
 
 .light {
@@ -150,6 +161,7 @@
   --border: hsl(0 0% 89.8%);
   --input: hsl(0 0% 89.8%);
   --ring: hsl(0 0% 3.9%);
+
   --chart-1: hsl(359 2% 90%);
   --chart-2: hsl(240 1% 74%);
   --chart-3: hsl(240 1% 58%);
@@ -164,6 +176,16 @@
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
   --sidebar-border: hsl(220 13% 91%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  --hljs-color-0: #444;
+  --hljs-color-1: #697070;
+  --hljs-color-2: #444a;
+  --hljs-color-3: #880000;
+  --hljs-color-4: #ab5656;
+  --hljs-color-5: #695;
+  --hljs-color-6: #397300;
+  --hljs-color-7: #1f7199;
+  --hljs-color-8: #38a;
 }
 
 @theme inline {
@@ -186,15 +208,18 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -203,10 +228,21 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+
   --sidebar-width-mobile: var(--sidebar-width-mobile);
   --sidebar-width: var(--sidebar-width);
   --sidebar-width-icon: var(--sidebar-width-icon);
   --header-height: var(--header-height);
+
+  --color-hljs-color-0: var(--hljs-color-0);
+  --color-hljs-color-1: var(--hljs-color-1);
+  --color-hljs-color-2: var(--hljs-color-2);
+  --color-hljs-color-3: var(--hljs-color-3);
+  --color-hljs-color-4: var(--hljs-color-4);
+  --color-hljs-color-5: var(--hljs-color-5);
+  --color-hljs-color-6: var(--hljs-color-6);
+  --color-hljs-color-7: var(--hljs-color-7);
+  --color-hljs-color-8: var(--hljs-color-8);
 }
 
 @layer base {
@@ -216,11 +252,83 @@
   body {
     @apply bg-background text-foreground;
   }
-  pre {
-    @apply w-full overflow-auto border rounded p-1
+
+  /* HLJS classnames */
+  .hljs {
+    @apply text-hljs-color-0;
+  }
+  /* Base color: saturation 0; */
+  .hljs-comment {
+    @apply text-hljs-color-1;
+  }
+  .hljs-tag,
+  .hljs-punctuation {
+    @apply text-hljs-color-2;
+  }
+  .hljs-tag .hljs-name,
+  .hljs-tag .hljs-attr {
+    @apply text-hljs-color-0;
+  }
+  .hljs-keyword,
+  .hljs-attribute,
+  .hljs-selector-tag,
+  .hljs-meta .hljs-keyword,
+  .hljs-doctag,
+  .hljs-name {
+    @apply font-bold;
+  }
+  /* User color: hue: 0 */
+  .hljs-type,
+  .hljs-string,
+  .hljs-number,
+  .hljs-selector-id,
+  .hljs-selector-class,
+  .hljs-quote,
+  .hljs-template-tag,
+  .hljs-deletion {
+    @apply text-hljs-color-3;
+  }
+  .hljs-title,
+  .hljs-section {
+    @apply text-hljs-color-3 font-bold;
+  }
+  .hljs-regexp,
+  .hljs-symbol,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-link,
+  .hljs-selector-attr,
+  .hljs-operator,
+  .hljs-selector-pseudo {
+    @apply text-hljs-color-4;
+  }
+  /* Language color: hue: 90; */
+  .hljs-literal {
+    @apply text-hljs-color-5;
+  }
+  .hljs-built_in,
+  .hljs-bullet,
+  .hljs-code,
+  .hljs-addition {
+    @apply text-hljs-color-6;
+  }
+  /* Meta color: hue: 200 */
+  .hljs-meta {
+    @apply text-hljs-color-7;
+  }
+  .hljs-meta .hljs-string {
+    @apply text-hljs-color-8;
+  }
+  /* Misc effects */
+  .hljs-emphasis {
+    @apply italic;
+  }
+  .hljs-strong {
+    @apply font-bold;
   }
 }
 
+/* animation opacity */
 @utility animation-from-opacity-* {
   --from-opacity: --value(--opacity-*, [percentage]);
   --from-opacity: calc(--value(integer) * 1%);
@@ -236,6 +344,8 @@
   --to-opacity: --value(--opacity-*, [percentage]);
   --to-opacity: calc(--value(integer) * 1%);
 }
+
+/* animation scale */
 
 @utility animation-from-scale-* {
   --from-scale: --value([length]);
@@ -269,6 +379,8 @@
   --to-scale: calc(--value(integer) * -1 / 100);
 }
 
+/* animation translate y */
+
 @utility animation-from-translate-y-* {
   --from-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]));
   transform: translate(var(--from-translate-x), var(--from-translate-y));
@@ -294,6 +406,8 @@
 @utility -animation-to-translate-y-* {
   --to-translate-y: calc(var(--spacing) * --value(integer, [percentage], [length]) * -1);
 }
+
+/* animation translate x */
 
 @utility animation-from-translate-x-* {
   --from-translate-x: calc(var(--spacing) * --value(integer, [percentage], [length]));
