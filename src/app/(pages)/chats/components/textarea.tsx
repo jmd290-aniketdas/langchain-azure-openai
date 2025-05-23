@@ -6,19 +6,17 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatContext } from "@/contexts/chat-context";
 import { useFilesContext } from "@/contexts/files-context";
+import useLocalStorage from "@/hooks/use-local-storage";
 import { cn } from "@/lib/utils";
 import { File, Folder, Globe, SendHorizontal, Stars } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
 import { KeyboardEventHandler, MouseEventHandler, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 export function Textarea({ className, ...props }: Omit<React.ComponentProps<"textarea">, "ref">) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendChat, generateNewChatIdAndNavigate, messageLoading, messageGenerating, currentChatContextLoading } =
-    useChatContext();
+  const { sendChat, messageLoading, messageGenerating, currentChatContextLoading } = useChatContext();
   const { status: sessionStatus } = useSession();
-  const { chatId: paramsChatId }: { chatId: string } = useParams();
 
   const onSendButtonClicked: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
@@ -50,11 +48,10 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
     textareaRef.current?.blur();
     const value = textareaRef.current.value;
 
-    if (paramsChatId) sendChat(value);
-    else generateNewChatIdAndNavigate(value);
+    sendChat(value);
 
     textareaRef.current.value = "";
-  }, [paramsChatId, textareaRef, sessionStatus, currentChatContextLoading, messageLoading, messageGenerating]);
+  }, [textareaRef, sessionStatus, currentChatContextLoading, messageLoading, messageGenerating]);
 
   return (
     <div
@@ -68,7 +65,7 @@ export function Textarea({ className, ...props }: Omit<React.ComponentProps<"tex
         <Stars className="size-5 stroke-1 my-0.5 flex-none" />
         <textarea
           ref={textareaRef}
-          className="h-16 focus:h-32 transition-[height] ease-in-out delay-100 duration-500 bg-transparent border-none outline-none text-wrap field-sizing-content resize-none overflow-y-auto overflow-x-hidden size-full disabled:cursor-not-allowed disabled:opacity-50 text-sm scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+          className="h-16 focus:h-32 transition-[height] ease-in-out delay-100 duration-500 bg-transparent border-none outline-none text-wrap field-sizing-content resize-none overflow-y-auto overflow-x-hidden size-full disabled:cursor-not-allowed disabled:opacity-50 text-sm"
           placeholder="Ask Questions"
           onKeyDown={onKeyDown}
           {...props}
@@ -229,7 +226,7 @@ function SelectFile() {
 }
 
 function WebSearchToggle() {
-  const { isWebSearchOn, setIsWebSearchOn, isWebSearchOnLoading } = useChatContext();
+  const [isWebSearchOn, setIsWebSearchOn, isWebSearchOnLoading] = useLocalStorage("webSearch", false);
   const { status: sessionStatus } = useSession();
 
   return (

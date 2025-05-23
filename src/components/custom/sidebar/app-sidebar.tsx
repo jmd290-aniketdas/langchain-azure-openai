@@ -1,8 +1,10 @@
 "use client";
 
+import { mainSidebarMenuContent } from "@/lib/menus";
 import { cn } from "@/lib/utils";
 import { MainSidebarMenuContent } from "@/types/menus.types";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Sidebar, SidebarGroup, SidebarMenuButton, SidebarMenuItem } from "../../ui/sidebar";
 import { SidebarFooterLarge, SidebarFooterSmall } from "./footers";
@@ -11,9 +13,21 @@ import { SidebarSkeletonLarge, SidebarSkeletonSmall } from "./skeletons";
 import { SubMenuHeader } from "./sub-menu-header";
 import { SubMenusContent } from "./sub-menus-content";
 
+const pathnameMap = [
+  { id: "chats", activeMenu: "Chats" },
+  { id: "folders", activeMenu: "Folders" },
+  { id: "settings", activeMenu: "Settings" },
+];
+
 export function AppSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
-  const [activeMenu, setActiveMenu] = useState<MainSidebarMenuContent>();
+  const pathname = usePathname();
+  const [activeMenu, setActiveMenu] = useState<MainSidebarMenuContent | undefined>(() => {
+    const currentActivePath = pathname.split("/")[1];
+    const activeMenu = pathnameMap.find((m) => m.id === currentActivePath);
+    const activeMenuObj = mainSidebarMenuContent.find((r) => r.name === activeMenu?.activeMenu);
+    return activeMenuObj;
+  });
 
   if (status === "unauthenticated") {
     return (

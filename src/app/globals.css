@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
-@plugin "tailwind-scrollbar";
 @plugin "@tailwindcss/typography";
 
 @custom-variant light (&:is(.light *));
@@ -23,7 +22,7 @@
       height: var(--radix-accordion-content-height);
     }
   }
-  
+
   @keyframes kf-accordion-up {
     from {
       height: var(--radix-accordion-content-height);
@@ -130,15 +129,15 @@
   --sidebar-width-icon: 3rem;
   --header-height: 3rem;
 
-  --hljs-color-0: #444;
-  --hljs-color-1: #697070;
-  --hljs-color-2: #444a;
-  --hljs-color-3: #880000;
-  --hljs-color-4: #ab5656;
-  --hljs-color-5: #695;
-  --hljs-color-6: #397300;
-  --hljs-color-7: #1f7199;
-  --hljs-color-8: #38a;
+  --hljs-color-0: #f8f8f2;
+  --hljs-color-1: #6272a4;
+  --hljs-color-2: #44475a;
+  --hljs-color-3: #ff79c6;
+  --hljs-color-4: #ff5555;
+  --hljs-color-5: #f1fa8c;
+  --hljs-color-6: #50fa7b;
+  --hljs-color-7: #8be9fd;
+  --hljs-color-8: #bd93f9;
 }
 
 .light {
@@ -247,7 +246,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent;
+    @apply border-border outline-ring/50 scrollbar-expand;
   }
   body {
     @apply bg-background text-foreground;
@@ -328,20 +327,42 @@
   }
 }
 
+/* Scrollbar */
+@utility scrollbar-expand {
+  &::-webkit-scrollbar {
+    @apply size-1 transition-colors;
+  }
+  &::-webkit-scrollbar-track {
+    @apply hidden;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply bg-muted/20 size-1 rounded-xl ;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    @apply bg-muted/80 size-2;
+  }
+}
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    @apply hidden w-0;
+  }
+}
+
 /* animation opacity */
 @utility animation-from-opacity-* {
-  --from-opacity: --value(--opacity-*, [percentage]);
+  --from-opacity: --value(--opacity- *, [percentage]);
   --from-opacity: calc(--value(integer) * 1%);
   opacity: var(--from-opacity);
 }
 
 @utility animation-via-opacity-* {
-  --via-opacity: --value(--opacity-*, [percentage]);
+  --via-opacity: --value(--opacity- *, [percentage]);
   --via-opacity: calc(--value(integer) * 1%);
 }
 
 @utility animation-to-opacity-* {
-  --to-opacity: --value(--opacity-*, [percentage]);
+  --to-opacity: --value(--opacity- *, [percentage]);
   --to-opacity: calc(--value(integer) * 1%);
 }
 

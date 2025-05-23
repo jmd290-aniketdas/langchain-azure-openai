@@ -1,12 +1,15 @@
 "use client";
 
+import { fetchAvailableGPTModels } from "@/actions/models.actions";
 import { useChatContext } from "@/contexts/chat-context";
-import { useModelsContext } from "@/contexts/models-context";
+import useLocalStorage from "@/hooks/use-local-storage";
 import { CHATS_ROOT_LINK } from "@/lib/consts";
 import { cn } from "@/lib/utils";
 import { GPTModelCatalog } from "@/types/models.types";
 import { Calendar, Stars } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { SidebarTrigger } from "../ui/sidebar";
@@ -14,9 +17,20 @@ import { Skeleton } from "../ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function AppTopbar({ className }: { className?: string }) {
-  const { availableModels, selectedModel, setSelectedModel, selectedModelLoading } = useModelsContext();
-  const { currentChatTitle, currentChatContextLoading } = useChatContext();
   const pathname = usePathname();
+  const { currentChatTitle, currentChatContextLoading } = useChatContext();
+
+  const [selectedModel, setSelectedModel, selectedModelLoading] = useLocalStorage("model", "");
+  const [availableModels, setAvailableModels] = useState<GPTModelCatalog[]>([]);
+
+  useEffect(() => {
+    fetchAvailableGPTModels()
+      .then((res) => setAvailableModels(res))
+      .catch((e) => {
+        console.error(e);
+        toast.error(e.message);
+      });
+  }, []);
 
   return (
     <header

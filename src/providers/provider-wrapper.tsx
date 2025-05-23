@@ -1,8 +1,8 @@
 "use client";
 
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ChatProvider } from "@/contexts/chat-context";
 import { FilesProvider } from "@/contexts/files-context";
-import { ModelsProvider } from "@/contexts/models-context";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState } from "react";
@@ -16,13 +16,13 @@ export default function ProvidersWrapper({ children }: { children: React.ReactNo
 
   const defaultMount: React.ReactNode = (
     <SessionProvider>
-      <FilesProvider>
-        <ModelsProvider>
+      <SidebarProvider>
+        <FilesProvider>
           <ChatProvider>
             <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
           </ChatProvider>
-        </ModelsProvider>
-      </FilesProvider>
+        </FilesProvider>
+      </SidebarProvider>
     </SessionProvider>
   );
 

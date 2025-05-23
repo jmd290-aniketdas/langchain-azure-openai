@@ -2,27 +2,24 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { MessageCircle, PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 
+import { fetchAllChatIdsForUser } from "@/actions/chats.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CHATS_ROOT_LINK } from "@/lib/consts";
+import { settingsSidebarMenuContent } from "@/lib/menus";
 import { cn } from "@/lib/utils";
+import { SubSidebarMenuContent } from "@/types/menus.types";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useChatContext } from "@/contexts/chat-context";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -36,6 +33,18 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+
+  chatMenuSidebarContent: SubSidebarMenuContent[];
+  chatMenuSidebarContentLoading: boolean;
+  chatMenuSidebarContentRefresh: (updateStateOnly?: boolean) => void;
+
+  folderMenuSidebarContent: SubSidebarMenuContent[];
+  folderMenuSidebarContentLoading: boolean;
+  folderMenuSidebarContentRefresh: (updateStateOnly?: boolean) => void;
+
+  settingsMenuSidebarContent: SubSidebarMenuContent[];
+  settingsMenuSidebarContentLoading: boolean;
+  settingsMenuSidebarContentRefresh: (updateStateOnly?: boolean) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -63,7 +72,66 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
+  const { status: sessionStatus, data: session } = useSession();
   const [openMobile, setOpenMobile] = React.useState(false);
+
+  const [chatMenuSidebarContent, setChatMenuSidebarContent] = React.useState<SubSidebarMenuContent[]>([]);
+  const [chatMenuSidebarContentLoading, setChatMenuSidebarContentLoading] = React.useState<boolean>(false);
+
+  const chatMenuSidebarContentRefresh = React.useCallback(
+    (updateStateOnly?: boolean) => {
+      if (sessionStatus !== "authenticated") return;
+
+      if (!updateStateOnly) setChatMenuSidebarContentLoading((_) => true);
+      fetchAllChatIdsForUser(session.user.email)
+        .then((res) =>
+          setChatMenuSidebarContent(
+            res.map((r) => ({
+              name: r.chatTitle,
+              icon: MessageCircle,
+              link: `${CHATS_ROOT_LINK}/${r.chatId}`,
+              searchTerms: [r.chatTitle, r.createdAt.toDateString(), r.updatedAt.toDateString()],
+            }))
+          )
+        )
+        .catch((err) => {
+          console.error(err);
+          toast.error(err.message);
+        })
+        .finally(() => {
+          if (!updateStateOnly) setChatMenuSidebarContentLoading((_) => false);
+        });
+    },
+    [session, sessionStatus]
+  );
+
+  const [folderMenuSidebarContent, setFolderMenuSidebarContent] = React.useState<SubSidebarMenuContent[]>([]);
+  const [folderMenuSidebarContentLoading, setFolderMenuSidebarContentLoading] = React.useState<boolean>(false);
+
+  const folderMenuSidebarContentRefresh = React.useCallback(
+    (updateStateOnly?: boolean) => {
+      if (sessionStatus !== "authenticated") return;
+
+      if (!updateStateOnly) setFolderMenuSidebarContentLoading((_) => true);
+      setFolderMenuSidebarContent([]); // TODO
+      if (!updateStateOnly) setFolderMenuSidebarContentLoading((_) => false);
+    },
+    [session, sessionStatus]
+  );
+
+  const [settingsMenuSidebarContent, setSettingsMenuSidebarContent] = React.useState<SubSidebarMenuContent[]>([]);
+  const [settingsMenuSidebarContentLoading, setSettingsMenuSidebarContentLoading] = React.useState<boolean>(false);
+
+  const settingsMenuSidebarContentRefresh = React.useCallback(
+    (updateStateOnly?: boolean) => {
+      if (sessionStatus !== "authenticated") return;
+
+      if (!updateStateOnly) setSettingsMenuSidebarContentLoading((_) => true);
+      setSettingsMenuSidebarContent(settingsSidebarMenuContent);
+      if (!updateStateOnly) setSettingsMenuSidebarContentLoading((_) => false);
+    },
+    [session, sessionStatus, settingsSidebarMenuContent]
+  );
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -92,10 +160,7 @@ function SidebarProvider({
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
+      if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         toggleSidebar();
       }
@@ -104,6 +169,13 @@ function SidebarProvider({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
+
+  React.useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    chatMenuSidebarContentRefresh();
+    folderMenuSidebarContentRefresh();
+    settingsMenuSidebarContentRefresh();
+  }, [sessionStatus]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -118,20 +190,45 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+
+      chatMenuSidebarContent,
+      chatMenuSidebarContentLoading,
+      chatMenuSidebarContentRefresh,
+
+      folderMenuSidebarContent,
+      folderMenuSidebarContentLoading,
+      folderMenuSidebarContentRefresh,
+
+      settingsMenuSidebarContent,
+      settingsMenuSidebarContentLoading,
+      settingsMenuSidebarContentRefresh,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [
+      state,
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      setOpenMobile,
+      toggleSidebar,
+
+      chatMenuSidebarContent,
+      chatMenuSidebarContentLoading,
+      chatMenuSidebarContentRefresh,
+
+      folderMenuSidebarContent,
+      folderMenuSidebarContentLoading,
+      folderMenuSidebarContentRefresh,
+
+      settingsMenuSidebarContent,
+      settingsMenuSidebarContentLoading,
+      settingsMenuSidebarContentRefresh,
+    ]
   );
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <div
-        data-slot="sidebar-wrapper"
-        className={cn(
-          "group/sidebar-wrapper flex min-h-svh w-full",
-          className
-        )}
-        {...props}
-      >
+      <div data-slot="sidebar-wrapper" className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)} {...props}>
         {children}
       </div>
     </SidebarContext.Provider>
@@ -235,11 +332,7 @@ function Sidebar({
   );
 }
 
-function SidebarTrigger({
-  className,
-  onClick,
-  ...props
-}: React.ComponentProps<typeof Button>) {
+function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -304,10 +397,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   );
 }
 
-function SidebarInput({
-  className,
-  ...props
-}: React.ComponentProps<typeof Input>) {
+function SidebarInput({ className, ...props }: React.ComponentProps<typeof Input>) {
   return (
     <Input
       data-slot="sidebar-input"
@@ -320,30 +410,17 @@ function SidebarInput({
 
 function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="sidebar-header"
-      data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-2", className)}
-      {...props}
-    />
+    <div data-slot="sidebar-header" data-sidebar="header" className={cn("flex flex-col gap-2 p-2", className)} {...props} />
   );
 }
 
 function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="sidebar-footer"
-      data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
-      {...props}
-    />
+    <div data-slot="sidebar-footer" data-sidebar="footer" className={cn("flex flex-col gap-2 p-2", className)} {...props} />
   );
 }
 
-function SidebarSeparator({
-  className,
-  ...props
-}: React.ComponentProps<typeof Separator>) {
+function SidebarSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
   return (
     <Separator
       data-slot="sidebar-separator"
@@ -379,11 +456,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function SidebarGroupLabel({
-  className,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean }) {
+function SidebarGroupLabel({ className, asChild = false, ...props }: React.ComponentProps<"div"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div";
 
   return (
@@ -400,11 +473,7 @@ function SidebarGroupLabel({
   );
 }
 
-function SidebarGroupAction({
-  className,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> & { asChild?: boolean }) {
+function SidebarGroupAction({ className, asChild = false, ...props }: React.ComponentProps<"button"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -423,10 +492,7 @@ function SidebarGroupAction({
   );
 }
 
-function SidebarGroupContent({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SidebarGroupContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-group-content"
@@ -526,7 +592,7 @@ function SidebarMenuButton({
       <TooltipContent
         side="right"
         align="center"
-        hidden={ (showTooltip ? false : state !== "collapsed") || isMobile}
+        hidden={(showTooltip ? false : state !== "collapsed") || isMobile}
         {...tooltip}
       />
     </Tooltip>
@@ -565,10 +631,7 @@ function SidebarMenuAction({
   );
 }
 
-function SidebarMenuBadge({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SidebarMenuBadge({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-menu-badge"
@@ -606,12 +669,7 @@ function SidebarMenuSkeleton({
       className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
       {...props}
     >
-      {showIcon && (
-        <Skeleton
-          className="size-4 rounded-md"
-          data-sidebar="menu-skeleton-icon"
-        />
-      )}
+      {showIcon && <Skeleton className="size-4 rounded-md" data-sidebar="menu-skeleton-icon" />}
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
@@ -640,10 +698,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
   );
 }
 
-function SidebarMenuSubItem({
-  className,
-  ...props
-}: React.ComponentProps<"li">) {
+function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
       data-slot="sidebar-menu-sub-item"
@@ -710,6 +765,5 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar
+  useSidebar,
 };
-

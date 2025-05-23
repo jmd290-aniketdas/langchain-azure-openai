@@ -1,7 +1,7 @@
 import { listUserFilesAndFoldersInBucket } from "@/actions/files.actions";
 import { MinIOFile, MinIOFolder } from "@/types/files.types";
 import { useSession } from "next-auth/react";
-import { createContext, Dispatch, useContext, useEffect, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type FilesContext = {
@@ -10,10 +10,10 @@ type FilesContext = {
   loading: boolean;
 
   selectedFile: string;
-  setSelectedFile: Dispatch<React.SetStateAction<string>>;
+  setSelectedFile: Dispatch<SetStateAction<string>>;
 
   selectedFolder: string;
-  setSelectedFolder: Dispatch<React.SetStateAction<string>>;
+  setSelectedFolder: Dispatch<SetStateAction<string>>;
 
   reloadFilesAndFolders: () => void;
 };
@@ -43,33 +43,32 @@ const FilesProvider = ({ children }: { children?: React.ReactNode }) => {
       .finally(() => setLoading(false));
   };
 
+  const reloadFilesAndFolders = useCallback(() => {
+    if (sessionStatus !== "authenticated") return;
+    loadFilesAndFolders(session.user.email);
+  }, [sessionStatus, session]);
+
   useEffect(() => {
     if (sessionStatus === "authenticated") {
       loadFilesAndFolders(session.user.email);
     }
   }, [session, sessionStatus]);
 
-  const reloadFilesAndFolders = () => {
-    if (sessionStatus !== "authenticated") return;
-    loadFilesAndFolders(session.user.email);
-  };
-
-  return (
-    <FilesContext.Provider
-      value={{
-        files,
-        folders,
-        loading,
-        selectedFile,
-        setSelectedFile,
-        selectedFolder,
-        setSelectedFolder,
-        reloadFilesAndFolders,
-      }}
-    >
-      {children}
-    </FilesContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      files,
+      folders,
+      loading,
+      selectedFile,
+      setSelectedFile,
+      selectedFolder,
+      setSelectedFolder,
+      reloadFilesAndFolders,
+    }),
+    [files, folders, loading, selectedFile, setSelectedFile, selectedFolder, setSelectedFolder, reloadFilesAndFolders]
   );
+
+  return <FilesContext.Provider value={contextValue}>{children}</FilesContext.Provider>;
 };
 
 const useFilesContext = () => {

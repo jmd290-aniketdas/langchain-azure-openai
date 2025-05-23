@@ -3,10 +3,10 @@ import { APP_NAME } from "@/lib/environment-variables";
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+    <div className="flex min-h-svh w-full flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <section className="flex gap-3 items-center justify-center">
-          <Logo className="size-6 p-px border border-muted bg-background" />
+        <section className="flex gap-3 items-center justify-center -ml-6">
+          <Logo className="size-6" />
           <p>{APP_NAME}</p>
         </section>
         {children}

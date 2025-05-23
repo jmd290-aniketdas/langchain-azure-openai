@@ -4,47 +4,12 @@ import Logo from "@/components/custom/logo";
 import { useChatContext } from "@/contexts/chat-context";
 import { cn } from "@/lib/utils";
 import { Session } from "next-auth";
-import { useEffect, useRef, useState } from "react";
 import { ChatBubble } from "./chat-bubble";
 import { ChatBubbleLoading } from "./chat-bubble-loading";
 import { ChatBubbleSkeleton } from "./chat-bubble-skeleton";
 
 export function ChatDisplay({ user, className }: { user: Session["user"]; className?: string }) {
-  const { currentChatContextLoading, messages, messageLoading, messageGenerating } = useChatContext();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (autoScrollEnabled && bottomRef.current && messageGenerating) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages.length, messages, messageGenerating, autoScrollEnabled, bottomRef]);
-
-  useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [bottomRef]);
-
-  useEffect(() => {
-    if (!containerRef.current || !bottomRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setAutoScrollEnabled(entry.isIntersecting);
-      },
-      {
-        root: containerRef.current,
-        rootMargin: "0px 200px 0px 0px",
-        threshold: 0,
-      }
-    );
-
-    observer.observe(bottomRef.current);
-    return () => observer.disconnect();
-  }, [bottomRef, containerRef]);
+  const { currentChatContextLoading, messages, messageLoading } = useChatContext();
 
   return (
     <div
@@ -53,7 +18,6 @@ export function ChatDisplay({ user, className }: { user: Session["user"]; classN
         "animate-enter fill-mode-forwards delay-1000 duration-500 animation-from-translate-y-8 animation-to-translate-y-0 animation-from-opacity-0 animation-to-opacity-100",
         className
       )}
-      ref={containerRef}
     >
       {currentChatContextLoading &&
         Array(8)
@@ -75,7 +39,6 @@ export function ChatDisplay({ user, className }: { user: Session["user"]; classN
       {!currentChatContextLoading &&
         messages.map((message, i) => <ChatBubble message={message} user={user} index={i} key={i} />)}
       {!currentChatContextLoading && messageLoading && <ChatBubbleLoading />}
-      <div ref={bottomRef} />
     </div>
   );
 }

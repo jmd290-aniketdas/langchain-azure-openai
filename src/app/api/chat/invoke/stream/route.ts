@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/auth";
 import { GPT_MODELS_LANGCHAIN_MAP } from "@/lib/langchain";
 import { ChatRequest } from "@/types/chats.types";
 import { ChatMessage } from "@langchain/core/messages";
@@ -7,6 +8,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if(!session)
+      throw new Error("Not Authenticated");
+    
     const requestData: ChatRequest = await req.json();
     if (
       !requestData.messages ||

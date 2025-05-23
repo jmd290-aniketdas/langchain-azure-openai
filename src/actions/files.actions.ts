@@ -242,7 +242,6 @@ const pasteFilesOrFoldersForUser = async (
       const aggregatedPaths = pathTo + pathWithoutFileName;
       await createFolderforUser(email, aggregatedPaths);
 
-      console.log(aggregatedPaths);
       const newObjectName = aggregatedPaths + fileName;
       const source = `/${bucketName}/${pathFrom}`;
       await minio.copyObject(bucketName, newObjectName, source);

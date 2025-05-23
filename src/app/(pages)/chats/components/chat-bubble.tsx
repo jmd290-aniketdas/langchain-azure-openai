@@ -48,9 +48,9 @@ export function ChatBubble({
         className={cn("hidden flex-none [&_svg]:size-5", message.role === "assistant" && "inline")}
       />
       <section
-        className={cn("rounded px-3 py-1 prose-sm flex-1 overflow-hidden", message.role === "user" && "py-2 bg-muted text-end")}
+        className={cn("rounded px-3 py-1 prose-sm flex-1 overflow-hidden", message.role === "user" && "py-2 bg-muted")}
       >
-        <Markdown>{message.content}</Markdown>
+        {message.role === "user" ? <p className="whitespace-pre-wrap">{message.content}</p> : <Markdown>{message.content}</Markdown>}
       </section>
       <section ref={scrollToViewElementRef} />
     </section>
